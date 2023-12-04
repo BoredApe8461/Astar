@@ -14,7 +14,7 @@ frame-support = { workspace = true }
 frame-system = { workspace = true }
 log = { workspace = true }
 num-traits = { workspace = true }
-pallet-assets = { workspace = true }
+pallet-uniques = { workspace = true }
 pallet-contracts = { workspace = true }
 pallet-contracts-primitives = { workspace = true }
 parity-scale-codec = { workspace = true }
@@ -36,6 +36,6 @@ std = [
 	"sp-std/std",
 	"sp-core/std",
 	"sp-runtime/std",
-	"pallet-assets/std",
+	"pallet-uniques/std",
 	"nfts-chain-extension-types/std",
 ]
