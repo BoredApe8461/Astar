@@ -1,7 +1,7 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 use parity_scale_codec::MaxEncodedLen;
 use parity_scale_codec::{Decode, Encode};
-use sp_runtime::{DispatchError, ModuleError};
+use sp_runtime::{traits::Printable, DispatchError, DispatchErrorWithPostInfo, ModuleError};
 
 #[derive(PartialEq, Eq, Copy, Clone, Encode, Decode, Debug)]
 #[cfg_attr(feature = "std", derive(scale_info::TypeInfo))]
@@ -77,6 +77,14 @@ impl From<DispatchError> for Outcome {
             Some("BidTooLow") => Outcome::BidTooLow,
             _ => Outcome::RuntimeError,
         };
+    }
+}
+
+impl<Info: Eq + PartialEq + Clone + Copy + Encode + Decode + Printable>
+    From<DispatchErrorWithPostInfo<Info>> for Outcome
+{
+    fn from(input: DispatchErrorWithPostInfo<Info>) -> Self {
+        input.error.into()
     }
 }
 

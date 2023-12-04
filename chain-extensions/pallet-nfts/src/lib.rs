@@ -20,21 +20,19 @@
 
 pub mod weights;
 
-use nfts_chain_extension_types::{select_origin, Origin, Outcome};
-use frame_support::traits::{
-    fungibles::approvals::Inspect as ApprovalInspect,
-    fungibles::metadata::Inspect as MetadataInspect,
-};
 use frame_system::RawOrigin;
-use pallet_uniques::WeightInfo;
+use nfts_chain_extension_types::{select_origin, Origin, Outcome};
 use pallet_contracts::chain_extension::{
     ChainExtension, Environment, Ext, InitState, RetVal, SysConfig,
 };
+use pallet_uniques::DestroyWitness;
 use parity_scale_codec::Encode;
 use sp_runtime::traits::StaticLookup;
 use sp_runtime::DispatchError;
 use sp_std::marker::PhantomData;
 use sp_std::vec::Vec;
+
+type AccountIdLookup<T> = <<T as SysConfig>::Lookup as StaticLookup>::Source;
 
 enum NftsFunc {
     Create,
@@ -121,7 +119,7 @@ impl<T, W> Default for NftsExtension<T, W> {
 impl<T, W> ChainExtension<T> for NftsExtension<T, W>
 where
     T: pallet_uniques::Config + pallet_contracts::Config,
-    <<T as SysConfig>::Lookup as StaticLookup>::Source: From<<T as SysConfig>::AccountId>,
+    AccountIdLookup<T>: From<<T as SysConfig>::AccountId>,
     <T as SysConfig>::AccountId: From<[u8; 32]>,
     W: weights::WeightInfo,
 {
@@ -155,8 +153,107 @@ where
                     }
                     Ok(_) => Ok(RetVal::Converging(Outcome::Success as u32)),
                 };
-            },
-            _ => todo!()
+            }
+            NftsFunc::Destroy => {
+                let (origin, collection_id, witness): (
+                    Origin,
+                    <T as pallet_uniques::Config>::CollectionId,
+                    DestroyWitness,
+                ) = env.read_as()?;
+
+                let raw_origin = select_origin!(&origin, env.ext().address().clone());
+
+                let call_result = pallet_uniques::Pallet::<T>::destroy(
+                    raw_origin.into(),
+                    collection_id.into(),
+                    witness,
+                );
+
+                return match call_result {
+                    Err(e) => {
+                        let mapped_error = Outcome::from(e);
+                        Ok(RetVal::Converging(mapped_error as u32))
+                    }
+                    Ok(_) => Ok(RetVal::Converging(Outcome::Success as u32)),
+                };
+            }
+            NftsFunc::Transfer => {
+                let (origin, collection_id, item, dest): (
+                    Origin,
+                    <T as pallet_uniques::Config>::CollectionId,
+                    <T as pallet_uniques::Config>::ItemId,
+                    T::AccountId,
+                ) = env.read_as()?;
+
+                let raw_origin = select_origin!(&origin, env.ext().address().clone());
+
+                let call_result = pallet_uniques::Pallet::<T>::transfer(
+                    raw_origin.into(),
+                    collection_id.into(),
+                    item,
+                    dest.into(),
+                );
+
+                return match call_result {
+                    Err(e) => {
+                        let mapped_error = Outcome::from(e);
+                        Ok(RetVal::Converging(mapped_error as u32))
+                    }
+                    Ok(_) => Ok(RetVal::Converging(Outcome::Success as u32)),
+                };
+            }
+            NftsFunc::Mint => {
+                let (origin, collection_id, item, owner): (
+                    Origin,
+                    <T as pallet_uniques::Config>::CollectionId,
+                    <T as pallet_uniques::Config>::ItemId,
+                    T::AccountId,
+                ) = env.read_as()?;
+
+                let raw_origin = select_origin!(&origin, env.ext().address().clone());
+
+                let call_result = pallet_uniques::Pallet::<T>::mint(
+                    raw_origin.into(),
+                    collection_id.into(),
+                    item,
+                    owner.into(),
+                );
+
+                return match call_result {
+                    Err(e) => {
+                        let mapped_error = Outcome::from(e);
+                        Ok(RetVal::Converging(mapped_error as u32))
+                    }
+                    Ok(_) => Ok(RetVal::Converging(Outcome::Success as u32)),
+                };
+            }
+            NftsFunc::Burn => {
+                let (origin, collection_id, item, check_owner): (
+                    Origin,
+                    <T as pallet_uniques::Config>::CollectionId,
+                    <T as pallet_uniques::Config>::ItemId,
+                    Option<T::AccountId>,
+                ) = env.read_as()?;
+
+                let raw_origin = select_origin!(&origin, env.ext().address().clone());
+
+                let check_owner: Option<AccountIdLookup<T>> = check_owner.map(|owner| owner.into());
+                let call_result = pallet_uniques::Pallet::<T>::burn(
+                    raw_origin.into(),
+                    collection_id.into(),
+                    item,
+                    check_owner.into(),
+                );
+
+                return match call_result {
+                    Err(e) => {
+                        let mapped_error = Outcome::from(e);
+                        Ok(RetVal::Converging(mapped_error as u32))
+                    }
+                    Ok(_) => Ok(RetVal::Converging(Outcome::Success as u32)),
+                };
+            }
+            _ => todo!(),
         }
 
         Ok(RetVal::Converging(Outcome::Success as u32))
