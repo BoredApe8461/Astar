@@ -20,8 +20,8 @@
 
 pub mod weights;
 
+use frame_support::traits::nonfungibles::{Inspect, InspectEnumerable};
 use frame_system::RawOrigin;
-use sp_runtime::BoundedVec;
 use nfts_chain_extension_types::{select_origin, Origin, Outcome};
 use pallet_contracts::chain_extension::{
     ChainExtension, Environment, Ext, InitState, RetVal, SysConfig,
@@ -29,6 +29,7 @@ use pallet_contracts::chain_extension::{
 use pallet_uniques::DestroyWitness;
 use parity_scale_codec::Encode;
 use sp_runtime::traits::StaticLookup;
+use sp_runtime::BoundedVec;
 use sp_runtime::DispatchError;
 use sp_std::marker::PhantomData;
 use sp_std::vec::Vec;
@@ -58,16 +59,15 @@ enum NftsFunc {
     ClearCollectionMetadata,
     SetAcceptOwnership,
     SetCollectionMaxSupply,
-    Collection,
-    OwnershipAcceptance,
-    Account,
-    CollectionAccount,
-    Item,
-    CollectionMetadataOf,
-    ItemMetadataOf,
+    Owner,
+    CollectionOwner,
     Attribute,
-    ItemPriceOf,
-    CollectionMaxSupply,
+    CollectionAttribute,
+    CanTransfer,
+    Collections,
+    Items,
+    Owned,
+    OwnedInCollection,
 }
 
 impl TryFrom<u16> for NftsFunc {
@@ -97,16 +97,15 @@ impl TryFrom<u16> for NftsFunc {
             20 => Ok(NftsFunc::ClearCollectionMetadata),
             21 => Ok(NftsFunc::SetAcceptOwnership),
             22 => Ok(NftsFunc::SetCollectionMaxSupply),
-            23 => Ok(NftsFunc::Collection),
-            24 => Ok(NftsFunc::OwnershipAcceptance),
-            25 => Ok(NftsFunc::Account),
-            26 => Ok(NftsFunc::CollectionAccount),
-            27 => Ok(NftsFunc::Item),
-            28 => Ok(NftsFunc::CollectionMetadataOf),
-            29 => Ok(NftsFunc::ItemMetadataOf),
-            30 => Ok(NftsFunc::Attribute),
-            31 => Ok(NftsFunc::ItemPriceOf),
-            32 => Ok(NftsFunc::CollectionMaxSupply),
+            23 => Ok(NftsFunc::Owner),
+            24 => Ok(NftsFunc::CollectionOwner),
+            25 => Ok(NftsFunc::Attribute),
+            26 => Ok(NftsFunc::CollectionAttribute),
+            27 => Ok(NftsFunc::CanTransfer),
+            28 => Ok(NftsFunc::Collections),
+            29 => Ok(NftsFunc::Items),
+            30 => Ok(NftsFunc::Owned),
+            31 => Ok(NftsFunc::OwnedInCollection),
             _ => Err(DispatchError::Other("Unimplemented func_id for NftsFunc")),
         }
     }
@@ -257,7 +256,7 @@ where
                     }
                     Ok(_) => Ok(RetVal::Converging(Outcome::Success as u32)),
                 };
-            },
+            }
             NftsFunc::Redeposit => {
                 let (origin, collection_id, items): (
                     Origin,
@@ -280,7 +279,7 @@ where
                     }
                     Ok(_) => Ok(RetVal::Converging(Outcome::Success as u32)),
                 };
-            },
+            }
             NftsFunc::Freeze => {
                 let (origin, collection_id, item): (
                     Origin,
@@ -303,7 +302,7 @@ where
                     }
                     Ok(_) => Ok(RetVal::Converging(Outcome::Success as u32)),
                 };
-            },
+            }
             NftsFunc::Thaw => {
                 let (origin, collection_id, item): (
                     Origin,
@@ -326,12 +325,10 @@ where
                     }
                     Ok(_) => Ok(RetVal::Converging(Outcome::Success as u32)),
                 };
-            },
+            }
             NftsFunc::FreezeCollection => {
-                let (origin, collection_id): (
-                    Origin,
-                    <T as pallet_uniques::Config>::CollectionId,
-                ) = env.read_as()?;
+                let (origin, collection_id): (Origin, <T as pallet_uniques::Config>::CollectionId) =
+                    env.read_as()?;
 
                 let raw_origin = select_origin!(&origin, env.ext().address().clone());
 
@@ -347,12 +344,10 @@ where
                     }
                     Ok(_) => Ok(RetVal::Converging(Outcome::Success as u32)),
                 };
-            },
+            }
             NftsFunc::ThawCollection => {
-                let (origin, collection_id): (
-                    Origin,
-                    <T as pallet_uniques::Config>::CollectionId,
-                ) = env.read_as()?;
+                let (origin, collection_id): (Origin, <T as pallet_uniques::Config>::CollectionId) =
+                    env.read_as()?;
 
                 let raw_origin = select_origin!(&origin, env.ext().address().clone());
 
@@ -368,7 +363,7 @@ where
                     }
                     Ok(_) => Ok(RetVal::Converging(Outcome::Success as u32)),
                 };
-            },
+            }
             NftsFunc::TransferOwnership => {
                 let (origin, collection_id, owner): (
                     Origin,
@@ -381,7 +376,7 @@ where
                 let call_result = pallet_uniques::Pallet::<T>::transfer_ownership(
                     raw_origin.into(),
                     collection_id.into(),
-                    owner.into()
+                    owner.into(),
                 );
 
                 return match call_result {
@@ -391,7 +386,7 @@ where
                     }
                     Ok(_) => Ok(RetVal::Converging(Outcome::Success as u32)),
                 };
-            },
+            }
             NftsFunc::SetTeam => {
                 let (origin, collection_id, issuer, admin, freezer): (
                     Origin,
@@ -418,7 +413,7 @@ where
                     }
                     Ok(_) => Ok(RetVal::Converging(Outcome::Success as u32)),
                 };
-            },
+            }
             NftsFunc::ApproveTransfer => {
                 let (origin, collection_id, item, delegate): (
                     Origin,
@@ -443,7 +438,7 @@ where
                     }
                     Ok(_) => Ok(RetVal::Converging(Outcome::Success as u32)),
                 };
-            },
+            }
             NftsFunc::CancelApproval => {
                 let (origin, collection_id, item, maybe_check_delegate): (
                     Origin,
@@ -454,7 +449,8 @@ where
 
                 let raw_origin = select_origin!(&origin, env.ext().address().clone());
 
-                let maybe_check_delegate: Option<AccountIdLookup<T>> = maybe_check_delegate.map(|d| d.into());
+                let maybe_check_delegate: Option<AccountIdLookup<T>> =
+                    maybe_check_delegate.map(|d| d.into());
                 let call_result = pallet_uniques::Pallet::<T>::cancel_approval(
                     raw_origin.into(),
                     collection_id.into(),
@@ -469,7 +465,7 @@ where
                     }
                     Ok(_) => Ok(RetVal::Converging(Outcome::Success as u32)),
                 };
-            },
+            }
             NftsFunc::SetAttribute => {
                 let (origin, collection_id, maybe_item, key, value): (
                     Origin,
@@ -486,7 +482,7 @@ where
                     collection_id.into(),
                     maybe_item,
                     key,
-                    value
+                    value,
                 );
 
                 return match call_result {
@@ -496,7 +492,7 @@ where
                     }
                     Ok(_) => Ok(RetVal::Converging(Outcome::Success as u32)),
                 };
-            },
+            }
             NftsFunc::ClearAttribute => {
                 let (origin, collection_id, maybe_item, key): (
                     Origin,
@@ -521,14 +517,14 @@ where
                     }
                     Ok(_) => Ok(RetVal::Converging(Outcome::Success as u32)),
                 };
-            },
+            }
             NftsFunc::SetMetadata => {
                 let (origin, collection_id, item, data, is_frozen): (
                     Origin,
                     <T as pallet_uniques::Config>::CollectionId,
                     <T as pallet_uniques::Config>::ItemId,
                     BoundedVec<u8, <T as pallet_uniques::Config>::StringLimit>,
-                    bool
+                    bool,
                 ) = env.read_as()?;
 
                 let raw_origin = select_origin!(&origin, env.ext().address().clone());
@@ -548,7 +544,7 @@ where
                     }
                     Ok(_) => Ok(RetVal::Converging(Outcome::Success as u32)),
                 };
-            },
+            }
             NftsFunc::ClearMetadata => {
                 let (origin, collection_id, item): (
                     Origin,
@@ -571,13 +567,13 @@ where
                     }
                     Ok(_) => Ok(RetVal::Converging(Outcome::Success as u32)),
                 };
-            },
+            }
             NftsFunc::SetCollectionMetadata => {
                 let (origin, collection_id, data, is_frozen): (
                     Origin,
                     <T as pallet_uniques::Config>::CollectionId,
                     BoundedVec<u8, <T as pallet_uniques::Config>::StringLimit>,
-                    bool
+                    bool,
                 ) = env.read_as()?;
 
                 let raw_origin = select_origin!(&origin, env.ext().address().clone());
@@ -596,7 +592,7 @@ where
                     }
                     Ok(_) => Ok(RetVal::Converging(Outcome::Success as u32)),
                 };
-            },
+            }
             NftsFunc::SetAcceptOwnership => {
                 let (origin, maybe_collection_id): (
                     Origin,
@@ -617,30 +613,83 @@ where
                     }
                     Ok(_) => Ok(RetVal::Converging(Outcome::Success as u32)),
                 };
-            },
-            NftsFunc::SetCollectionMaxSupply => {
-                let (origin, collection_id, max_supply): (
-                    Origin,
+            }
+            NftsFunc::Owner => {
+                let (collection_id, item): (
                     <T as pallet_uniques::Config>::CollectionId,
-                    u32 
+                    <T as pallet_uniques::Config>::ItemId,
                 ) = env.read_as()?;
 
-                let raw_origin = select_origin!(&origin, env.ext().address().clone());
+                let owner = pallet_uniques::Pallet::<T>::owner(collection_id, item);
+                env.write(&owner.encode(), false, None)?;
+            }
+            NftsFunc::CollectionOwner => {
+                let collection_id: <T as pallet_uniques::Config>::CollectionId = env.read_as()?;
 
-                let call_result = pallet_uniques::Pallet::<T>::set_collection_max_supply(
-                    raw_origin.into(),
-                    collection_id,
-                    max_supply,
-                );
+                let owner = pallet_uniques::Pallet::<T>::collection_owner(collection_id);
+                env.write(&owner.encode(), false, None)?;
+            }
+            NftsFunc::Attribute => {
+                let (collection_id, item, key): (
+                    <T as pallet_uniques::Config>::CollectionId,
+                    <T as pallet_uniques::Config>::ItemId,
+                    BoundedVec<u8, <T as pallet_uniques::Config>::KeyLimit>,
+                ) = env.read_as()?;
 
-                return match call_result {
-                    Err(e) => {
-                        let mapped_error = Outcome::from(e);
-                        Ok(RetVal::Converging(mapped_error as u32))
-                    }
-                    Ok(_) => Ok(RetVal::Converging(Outcome::Success as u32)),
-                };
-            },
+                let attribute = pallet_uniques::Pallet::<T>::attribute(&collection_id, &item, &key);
+                env.write(&attribute.encode(), false, None)?;
+            }
+            NftsFunc::CollectionAttribute => {
+                let (collection_id, key): (
+                    <T as pallet_uniques::Config>::CollectionId,
+                    BoundedVec<u8, <T as pallet_uniques::Config>::KeyLimit>,
+                ) = env.read_as()?;
+
+                let attribute =
+                    pallet_uniques::Pallet::<T>::collection_attribute(&collection_id, &key);
+                env.write(&attribute.encode(), false, None)?;
+            }
+            NftsFunc::CanTransfer => {
+                let (collection_id, item): (
+                    <T as pallet_uniques::Config>::CollectionId,
+                    <T as pallet_uniques::Config>::ItemId,
+                ) = env.read_as()?;
+
+                let can_transfer = pallet_uniques::Pallet::<T>::can_transfer(&collection_id, &item);
+                env.write(&can_transfer.encode(), false, None)?;
+            }
+            NftsFunc::Collections => {
+                let collections: Vec<<T as pallet_uniques::Config>::CollectionId> =
+                    pallet_uniques::Pallet::<T>::collections().collect();
+                env.write(&collections.encode(), false, None)?;
+            }
+            NftsFunc::Items => {
+                let collection_id: <T as pallet_uniques::Config>::CollectionId = env.read_as()?;
+
+                let items: Vec<<T as pallet_uniques::Config>::ItemId> =
+                    pallet_uniques::Pallet::<T>::items(&collection_id).collect();
+                env.write(&items.encode(), false, None)?;
+            }
+            NftsFunc::Owned => {
+                let who: T::AccountId = env.read_as()?;
+
+                let items: Vec<(
+                    <T as pallet_uniques::Config>::CollectionId,
+                    <T as pallet_uniques::Config>::ItemId,
+                )> = pallet_uniques::Pallet::<T>::owned(&who).collect();
+                env.write(&items.encode(), false, None)?;
+            }
+            NftsFunc::OwnedInCollection => {
+                let (who, collection_id): (
+                    T::AccountId,
+                    <T as pallet_uniques::Config>::CollectionId,
+                ) = env.read_as()?;
+
+                let items: Vec<<T as pallet_uniques::Config>::ItemId> =
+                    pallet_uniques::Pallet::<T>::owned_in_collection(&collection_id, &who)
+                        .collect();
+                env.write(&items.encode(), false, None)?;
+            }
             _ => todo!(),
         }
 
