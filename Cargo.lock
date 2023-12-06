@@ -6062,6 +6062,7 @@ dependencies = [
  "pallet-transaction-payment-rpc-runtime-api",
  "pallet-treasury",
  "pallet-unified-accounts",
+ "pallet-uniques",
  "pallet-utility",
  "pallet-vesting",
  "pallet-xvm",
