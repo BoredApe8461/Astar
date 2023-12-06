@@ -26,7 +26,7 @@ use nfts_chain_extension_types::{select_origin, Origin, Outcome};
 use pallet_contracts::chain_extension::{
     ChainExtension, Environment, Ext, InitState, RetVal, SysConfig,
 };
-use pallet_uniques::DestroyWitness;
+use pallet_uniques::{DestroyWitness, WeightInfo};
 use parity_scale_codec::Encode;
 use sp_runtime::traits::StaticLookup;
 use sp_runtime::BoundedVec;
@@ -142,6 +142,9 @@ where
                     T::AccountId,
                 ) = env.read_as()?;
 
+                let base_weight = <T as pallet_uniques::Config>::WeightInfo::create();
+                env.charge_weight(base_weight)?;
+
                 let raw_origin = select_origin!(&origin, env.ext().address().clone());
 
                 let call_result = pallet_uniques::Pallet::<T>::create(
@@ -164,6 +167,13 @@ where
                     <T as pallet_uniques::Config>::CollectionId,
                     DestroyWitness,
                 ) = env.read_as()?;
+
+                let base_weight = <T as pallet_uniques::Config>::WeightInfo::destroy(
+                    witness.items,
+                    witness.item_metadatas,
+			        witness.attributes,
+                );
+                env.charge_weight(base_weight)?;
 
                 let raw_origin = select_origin!(&origin, env.ext().address().clone());
 
@@ -188,6 +198,9 @@ where
                     <T as pallet_uniques::Config>::ItemId,
                     T::AccountId,
                 ) = env.read_as()?;
+
+                let base_weight = <T as pallet_uniques::Config>::WeightInfo::transfer();
+                env.charge_weight(base_weight)?;
 
                 let raw_origin = select_origin!(&origin, env.ext().address().clone());
 
@@ -214,6 +227,9 @@ where
                     T::AccountId,
                 ) = env.read_as()?;
 
+                let base_weight = <T as pallet_uniques::Config>::WeightInfo::mint();
+                env.charge_weight(base_weight)?;
+
                 let raw_origin = select_origin!(&origin, env.ext().address().clone());
 
                 let call_result = pallet_uniques::Pallet::<T>::mint(
@@ -238,6 +254,9 @@ where
                     <T as pallet_uniques::Config>::ItemId,
                     Option<T::AccountId>,
                 ) = env.read_as()?;
+
+                let base_weight = <T as pallet_uniques::Config>::WeightInfo::burn();
+                env.charge_weight(base_weight)?;
 
                 let raw_origin = select_origin!(&origin, env.ext().address().clone());
 
@@ -264,6 +283,9 @@ where
                     Vec<<T as pallet_uniques::Config>::ItemId>,
                 ) = env.read_as_unbounded(env.in_len())?;
 
+                let base_weight = <T as pallet_uniques::Config>::WeightInfo::redeposit(items.len() as u32);
+                env.charge_weight(base_weight)?;
+
                 let raw_origin = select_origin!(&origin, env.ext().address().clone());
 
                 let call_result = pallet_uniques::Pallet::<T>::redeposit(
@@ -286,6 +308,9 @@ where
                     <T as pallet_uniques::Config>::CollectionId,
                     <T as pallet_uniques::Config>::ItemId,
                 ) = env.read_as()?;
+
+                let base_weight = <T as pallet_uniques::Config>::WeightInfo::freeze();
+                env.charge_weight(base_weight)?;
 
                 let raw_origin = select_origin!(&origin, env.ext().address().clone());
 
@@ -310,6 +335,9 @@ where
                     <T as pallet_uniques::Config>::ItemId,
                 ) = env.read_as()?;
 
+                let base_weight = <T as pallet_uniques::Config>::WeightInfo::thaw();
+                env.charge_weight(base_weight)?;
+
                 let raw_origin = select_origin!(&origin, env.ext().address().clone());
 
                 let call_result = pallet_uniques::Pallet::<T>::thaw(
@@ -330,6 +358,9 @@ where
                 let (origin, collection_id): (Origin, <T as pallet_uniques::Config>::CollectionId) =
                     env.read_as()?;
 
+                let base_weight = <T as pallet_uniques::Config>::WeightInfo::freeze_collection();
+                env.charge_weight(base_weight)?;
+
                 let raw_origin = select_origin!(&origin, env.ext().address().clone());
 
                 let call_result = pallet_uniques::Pallet::<T>::freeze_collection(
@@ -348,6 +379,9 @@ where
             NftsFunc::ThawCollection => {
                 let (origin, collection_id): (Origin, <T as pallet_uniques::Config>::CollectionId) =
                     env.read_as()?;
+
+                let base_weight = <T as pallet_uniques::Config>::WeightInfo::thaw_collection();
+                env.charge_weight(base_weight)?;
 
                 let raw_origin = select_origin!(&origin, env.ext().address().clone());
 
@@ -370,6 +404,9 @@ where
                     <T as pallet_uniques::Config>::CollectionId,
                     T::AccountId,
                 ) = env.read_as()?;
+
+                let base_weight = <T as pallet_uniques::Config>::WeightInfo::transfer_ownership();
+                env.charge_weight(base_weight)?;
 
                 let raw_origin = select_origin!(&origin, env.ext().address().clone());
 
@@ -395,6 +432,9 @@ where
                     T::AccountId,
                     T::AccountId,
                 ) = env.read_as()?;
+
+                let base_weight = <T as pallet_uniques::Config>::WeightInfo::set_team();
+                env.charge_weight(base_weight)?;
 
                 let raw_origin = select_origin!(&origin, env.ext().address().clone());
 
@@ -422,6 +462,9 @@ where
                     T::AccountId,
                 ) = env.read_as()?;
 
+                let base_weight = <T as pallet_uniques::Config>::WeightInfo::approve_transfer();
+                env.charge_weight(base_weight)?;
+
                 let raw_origin = select_origin!(&origin, env.ext().address().clone());
 
                 let call_result = pallet_uniques::Pallet::<T>::approve_transfer(
@@ -446,6 +489,9 @@ where
                     <T as pallet_uniques::Config>::ItemId,
                     Option<T::AccountId>,
                 ) = env.read_as()?;
+
+                let base_weight = <T as pallet_uniques::Config>::WeightInfo::cancel_approval();
+                env.charge_weight(base_weight)?;
 
                 let raw_origin = select_origin!(&origin, env.ext().address().clone());
 
@@ -475,6 +521,9 @@ where
                     BoundedVec<u8, <T as pallet_uniques::Config>::ValueLimit>,
                 ) = env.read_as()?;
 
+                let base_weight = <T as pallet_uniques::Config>::WeightInfo::set_attribute();
+                env.charge_weight(base_weight)?;
+
                 let raw_origin = select_origin!(&origin, env.ext().address().clone());
 
                 let call_result = pallet_uniques::Pallet::<T>::set_attribute(
@@ -500,6 +549,9 @@ where
                     Option<<T as pallet_uniques::Config>::ItemId>,
                     BoundedVec<u8, <T as pallet_uniques::Config>::KeyLimit>,
                 ) = env.read_as()?;
+
+                let base_weight = <T as pallet_uniques::Config>::WeightInfo::clear_attribute();
+                env.charge_weight(base_weight)?;
 
                 let raw_origin = select_origin!(&origin, env.ext().address().clone());
 
@@ -527,6 +579,9 @@ where
                     bool,
                 ) = env.read_as()?;
 
+                let base_weight = <T as pallet_uniques::Config>::WeightInfo::set_metadata();
+                env.charge_weight(base_weight)?;
+
                 let raw_origin = select_origin!(&origin, env.ext().address().clone());
 
                 let call_result = pallet_uniques::Pallet::<T>::set_metadata(
@@ -552,6 +607,9 @@ where
                     <T as pallet_uniques::Config>::ItemId,
                 ) = env.read_as()?;
 
+                let base_weight = <T as pallet_uniques::Config>::WeightInfo::clear_metadata();
+                env.charge_weight(base_weight)?;
+
                 let raw_origin = select_origin!(&origin, env.ext().address().clone());
 
                 let call_result = pallet_uniques::Pallet::<T>::clear_metadata(
@@ -576,6 +634,9 @@ where
                     bool,
                 ) = env.read_as()?;
 
+                let base_weight = <T as pallet_uniques::Config>::WeightInfo::set_collection_metadata();
+                env.charge_weight(base_weight)?;
+
                 let raw_origin = select_origin!(&origin, env.ext().address().clone());
 
                 let call_result = pallet_uniques::Pallet::<T>::set_collection_metadata(
@@ -598,6 +659,9 @@ where
                     Origin,
                     Option<<T as pallet_uniques::Config>::CollectionId>,
                 ) = env.read_as()?;
+
+                let base_weight = <T as pallet_uniques::Config>::WeightInfo::set_accept_ownership();
+                env.charge_weight(base_weight)?;
 
                 let raw_origin = select_origin!(&origin, env.ext().address().clone());
 
