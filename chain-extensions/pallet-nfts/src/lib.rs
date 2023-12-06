@@ -171,7 +171,7 @@ where
                 let base_weight = <T as pallet_uniques::Config>::WeightInfo::destroy(
                     witness.items,
                     witness.item_metadatas,
-			        witness.attributes,
+                    witness.attributes,
                 );
                 env.charge_weight(base_weight)?;
 
@@ -283,7 +283,8 @@ where
                     Vec<<T as pallet_uniques::Config>::ItemId>,
                 ) = env.read_as_unbounded(env.in_len())?;
 
-                let base_weight = <T as pallet_uniques::Config>::WeightInfo::redeposit(items.len() as u32);
+                let base_weight =
+                    <T as pallet_uniques::Config>::WeightInfo::redeposit(items.len() as u32);
                 env.charge_weight(base_weight)?;
 
                 let raw_origin = select_origin!(&origin, env.ext().address().clone());
@@ -634,7 +635,8 @@ where
                     bool,
                 ) = env.read_as()?;
 
-                let base_weight = <T as pallet_uniques::Config>::WeightInfo::set_collection_metadata();
+                let base_weight =
+                    <T as pallet_uniques::Config>::WeightInfo::set_collection_metadata();
                 env.charge_weight(base_weight)?;
 
                 let raw_origin = select_origin!(&origin, env.ext().address().clone());
@@ -644,6 +646,29 @@ where
                     collection_id.into(),
                     data,
                     is_frozen,
+                );
+
+                return match call_result {
+                    Err(e) => {
+                        let mapped_error = Outcome::from(e);
+                        Ok(RetVal::Converging(mapped_error as u32))
+                    }
+                    Ok(_) => Ok(RetVal::Converging(Outcome::Success as u32)),
+                };
+            }
+            NftsFunc::ClearCollectionMetadata => {
+                let (origin, collection_id): (Origin, <T as pallet_uniques::Config>::CollectionId) =
+                    env.read_as()?;
+
+                let base_weight =
+                    <T as pallet_uniques::Config>::WeightInfo::clear_collection_metadata();
+                env.charge_weight(base_weight)?;
+
+                let raw_origin = select_origin!(&origin, env.ext().address().clone());
+
+                let call_result = pallet_uniques::Pallet::<T>::clear_collection_metadata(
+                    raw_origin.into(),
+                    collection_id.into(),
                 );
 
                 return match call_result {
@@ -678,17 +703,50 @@ where
                     Ok(_) => Ok(RetVal::Converging(Outcome::Success as u32)),
                 };
             }
+            NftsFunc::SetCollectionMaxSupply => {
+                let (origin, collection_id, max_supply): (
+                    Origin,
+                    <T as pallet_uniques::Config>::CollectionId,
+                    u32,
+                ) = env.read_as()?;
+
+                let base_weight =
+                    <T as pallet_uniques::Config>::WeightInfo::set_collection_max_supply();
+                env.charge_weight(base_weight)?;
+
+                let raw_origin = select_origin!(&origin, env.ext().address().clone());
+
+                let call_result = pallet_uniques::Pallet::<T>::set_collection_max_supply(
+                    raw_origin.into(),
+                    collection_id,
+                    max_supply,
+                );
+
+                return match call_result {
+                    Err(e) => {
+                        let mapped_error = Outcome::from(e);
+                        Ok(RetVal::Converging(mapped_error as u32))
+                    }
+                    Ok(_) => Ok(RetVal::Converging(Outcome::Success as u32)),
+                };
+            }
             NftsFunc::Owner => {
                 let (collection_id, item): (
                     <T as pallet_uniques::Config>::CollectionId,
                     <T as pallet_uniques::Config>::ItemId,
                 ) = env.read_as()?;
 
+                let base_weight = <W as weights::WeightInfo>::owner();
+                env.charge_weight(base_weight)?;
+
                 let owner = pallet_uniques::Pallet::<T>::owner(collection_id, item);
                 env.write(&owner.encode(), false, None)?;
             }
             NftsFunc::CollectionOwner => {
                 let collection_id: <T as pallet_uniques::Config>::CollectionId = env.read_as()?;
+
+                let base_weight = <W as weights::WeightInfo>::collection_owner();
+                env.charge_weight(base_weight)?;
 
                 let owner = pallet_uniques::Pallet::<T>::collection_owner(collection_id);
                 env.write(&owner.encode(), false, None)?;
@@ -700,6 +758,9 @@ where
                     BoundedVec<u8, <T as pallet_uniques::Config>::KeyLimit>,
                 ) = env.read_as()?;
 
+                let base_weight = <W as weights::WeightInfo>::attribute();
+                env.charge_weight(base_weight)?;
+
                 let attribute = pallet_uniques::Pallet::<T>::attribute(&collection_id, &item, &key);
                 env.write(&attribute.encode(), false, None)?;
             }
@@ -708,6 +769,9 @@ where
                     <T as pallet_uniques::Config>::CollectionId,
                     BoundedVec<u8, <T as pallet_uniques::Config>::KeyLimit>,
                 ) = env.read_as()?;
+
+                let base_weight = <W as weights::WeightInfo>::collection_attribute();
+                env.charge_weight(base_weight)?;
 
                 let attribute =
                     pallet_uniques::Pallet::<T>::collection_attribute(&collection_id, &key);
@@ -719,42 +783,66 @@ where
                     <T as pallet_uniques::Config>::ItemId,
                 ) = env.read_as()?;
 
+                let base_weight = <W as weights::WeightInfo>::can_transfer();
+                env.charge_weight(base_weight)?;
+
                 let can_transfer = pallet_uniques::Pallet::<T>::can_transfer(&collection_id, &item);
                 env.write(&can_transfer.encode(), false, None)?;
             }
             NftsFunc::Collections => {
+                let read_bound: u32 = env.read_as()?;
+
+                let base_weight = <W as weights::WeightInfo>::collections(read_bound);
+                env.charge_weight(base_weight)?;
+
                 let collections: Vec<<T as pallet_uniques::Config>::CollectionId> =
                     pallet_uniques::Pallet::<T>::collections().collect();
+
                 env.write(&collections.encode(), false, None)?;
             }
             NftsFunc::Items => {
-                let collection_id: <T as pallet_uniques::Config>::CollectionId = env.read_as()?;
+                let (collection_id, read_bound): (
+                    <T as pallet_uniques::Config>::CollectionId,
+                    u32,
+                ) = env.read_as()?;
+
+                let base_weight = <W as weights::WeightInfo>::items(read_bound);
+                env.charge_weight(base_weight)?;
 
                 let items: Vec<<T as pallet_uniques::Config>::ItemId> =
                     pallet_uniques::Pallet::<T>::items(&collection_id).collect();
+
                 env.write(&items.encode(), false, None)?;
             }
             NftsFunc::Owned => {
-                let who: T::AccountId = env.read_as()?;
+                let (who, read_bound): (T::AccountId, u32) = env.read_as()?;
 
                 let items: Vec<(
                     <T as pallet_uniques::Config>::CollectionId,
                     <T as pallet_uniques::Config>::ItemId,
                 )> = pallet_uniques::Pallet::<T>::owned(&who).collect();
+
+                let base_weight = <W as weights::WeightInfo>::owned(read_bound);
+                env.charge_weight(base_weight)?;
+
                 env.write(&items.encode(), false, None)?;
             }
             NftsFunc::OwnedInCollection => {
-                let (who, collection_id): (
+                let (who, collection_id, read_bound): (
                     T::AccountId,
                     <T as pallet_uniques::Config>::CollectionId,
+                    u32,
                 ) = env.read_as()?;
 
                 let items: Vec<<T as pallet_uniques::Config>::ItemId> =
                     pallet_uniques::Pallet::<T>::owned_in_collection(&collection_id, &who)
                         .collect();
+
+                let base_weight = <W as weights::WeightInfo>::owned_in_collection(read_bound);
+                env.charge_weight(base_weight)?;
+
                 env.write(&items.encode(), false, None)?;
             }
-            _ => todo!(),
         }
 
         Ok(RetVal::Converging(Outcome::Success as u32))

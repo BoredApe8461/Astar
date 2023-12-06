@@ -25,38 +25,53 @@ use sp_std::marker::PhantomData;
 
 /// Weight functions needed for pallet-assets chain-extension.
 pub trait WeightInfo {
-    fn balance_of() -> Weight;
-    fn total_supply() -> Weight;
-    fn allowance() -> Weight;
-    fn metadata_name() -> Weight;
-    fn metadata_symbol() -> Weight;
-    fn metadata_decimals() -> Weight;
+    fn owner() -> Weight;
+    fn collection_owner() -> Weight;
+    fn attribute() -> Weight;
+    fn collection_attribute() -> Weight;
+    fn can_transfer() -> Weight;
+    fn collections(n: u32) -> Weight;
+    fn items(n: u32) -> Weight;
+    fn owned(n: u32) -> Weight;
+    fn owned_in_collection(n: u32) -> Weight;
 }
 
-/// Weights for pallet-assets chain-extension
+/// Weights for pallet-uniques chain-extension
 pub struct SubstrateWeight<T>(PhantomData<T>);
 impl<T: frame_system::Config> WeightInfo for SubstrateWeight<T> {
-    fn balance_of() -> Weight {
+    fn owner() -> Weight {
         T::DbWeight::get().reads(1 as u64)
     }
 
-    fn total_supply() -> Weight {
+    fn collection_owner() -> Weight {
         T::DbWeight::get().reads(1 as u64)
     }
 
-    fn allowance() -> Weight {
+    fn attribute() -> Weight {
         T::DbWeight::get().reads(1 as u64)
     }
 
-    fn metadata_name() -> Weight {
+    fn collection_attribute() -> Weight {
         T::DbWeight::get().reads(1 as u64)
     }
 
-    fn metadata_symbol() -> Weight {
+    fn can_transfer() -> Weight {
         T::DbWeight::get().reads(1 as u64)
     }
 
-    fn metadata_decimals() -> Weight {
-        T::DbWeight::get().reads(1 as u64)
+    fn collections(n: u32) -> Weight {
+        T::DbWeight::get().reads(1 as u64).saturating_mul(n.into())
+    }
+
+    fn items(n: u32) -> Weight {
+        T::DbWeight::get().reads(1 as u64).saturating_mul(n.into())
+    }
+
+    fn owned(n: u32) -> Weight {
+        T::DbWeight::get().reads(1 as u64).saturating_mul(n.into())
+    }
+
+    fn owned_in_collection(n: u32) -> Weight {
+        T::DbWeight::get().reads(1 as u64).saturating_mul(n.into())
     }
 }
