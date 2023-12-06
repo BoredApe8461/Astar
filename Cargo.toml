@@ -17,6 +17,7 @@ members = [
 
 	"chain-extensions/dapps-staking",
 	"chain-extensions/pallet-assets",
+	"chain-extensions/pallet-nfts",
 	"chain-extensions/xvm",
 	"chain-extensions/unified-accounts",
 	"chain-extensions/types/*",
@@ -150,6 +151,7 @@ frame-benchmarking-cli = { git = "https://github.com/paritytech/substrate", bran
 # Substrate pallets
 # (wasm)
 pallet-assets = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.43", default-features = false }
+pallet-uniques = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.43", default-features = false }
 pallet-balances = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.43", default-features = false }
 pallet-proxy = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.43", default-features = false }
 pallet-utility = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.43", default-features = false }
@@ -295,11 +297,13 @@ pallet-evm-precompile-dapps-staking = { path = "./precompiles/dapps-staking", de
 pallet-chain-extension-dapps-staking = { path = "./chain-extensions/dapps-staking", default-features = false }
 pallet-chain-extension-xvm = { path = "./chain-extensions/xvm", default-features = false }
 pallet-chain-extension-assets = { path = "./chain-extensions/pallet-assets", default-features = false }
+pallet-chain-extension-nfts = { path = "./chain-extensions/pallet-nfts", default-features = false }
 pallet-chain-extension-unified-accounts = { path = "./chain-extensions/unified-accounts", default-features = false }
 
 dapps-staking-chain-extension-types = { path = "./chain-extensions/types/dapps-staking", default-features = false }
 xvm-chain-extension-types = { path = "./chain-extensions/types/xvm", default-features = false }
 assets-chain-extension-types = { path = "./chain-extensions/types/assets", default-features = false }
+nfts-chain-extension-types = { path = "./chain-extensions/types/nfts", default-features = false }
 unified-accounts-chain-extension-types = { path = "./chain-extensions/types/unified-accounts", default-features = false }
 
 precompile-utils = { path = "./precompiles/utils", default-features = false }
