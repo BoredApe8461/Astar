@@ -19,7 +19,7 @@
 use super::{
     AccountId, AllPalletsWithSystem, AssetId, Assets, CollectionId, ItemId, Uniques, Balance, Balances, DealWithFees,
     ParachainInfo, ParachainSystem, PolkadotXcm, Runtime, RuntimeCall, RuntimeEvent, RuntimeOrigin,
-    ShibuyaAssetLocationIdConverter, TreasuryAccountId, XcAssetConfig, XcmWeightToFee, XcmpQueue,
+    ShibuyaAssetLocationIdConverter, ShibuyaUniquesLocationIdConverter, TreasuryAccountId, XcAssetConfig, XcmWeightToFee, XcmpQueue,
 };
 use crate::weights;
 use frame_support::{
@@ -32,7 +32,7 @@ use sp_runtime::traits::Convert;
 
 // Polkadot imports
 use xcm::latest::prelude::*;
-use xcm_builder::{
+use xcm_builder::{AsPrefixedGeneralIndex,
     AccountId32Aliases, AllowKnownQueryResponses, AllowSubscriptionsFrom,
     AllowTopLevelPaidExecutionFrom, AllowUnpaidExecutionFrom, ConvertedConcreteId, CurrencyAdapter,
     EnsureXcmOrigin, FixedWeightBounds, FungiblesAdapter, NonFungiblesAdapter, IsConcrete, NoChecking,
@@ -112,7 +112,7 @@ pub type FungiblesTransactor = FungiblesAdapter<
 pub type NonFungiblesTransactor = NonFungiblesAdapter<
     // Use the uniques pallet:
     Uniques,
-    ConvertedConcreteId<CollectionId, ItemId, JustTry, JustTry>,
+    ConvertedConcreteId<CollectionId, ItemId, AsPrefixedGeneralIndex<(), u32, JustTry>, JustTry>,
     LocationToAccountId,
     AccountId,
     // We don't support teleport so no need to check any assets.
