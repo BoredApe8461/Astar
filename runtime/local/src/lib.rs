@@ -112,8 +112,6 @@ mod precompiles;
 pub use precompiles::{LocalNetworkPrecompiles, ASSET_PRECOMPILE_ADDRESS_PREFIX};
 pub type Precompiles = LocalNetworkPrecompiles<Runtime>;
 
-pub type AssetsForceOrigin = EnsureRoot<AccountId>;
-
 mod chain_extensions;
 pub use chain_extensions::*;
 
@@ -950,11 +948,7 @@ impl InstanceFilter<RuntimeCall> for ProxyType {
             }
             // All Runtime calls from Pallet Assets allowed for proxy account
             ProxyType::Assets => {
-                matches!(
-                    c, 
-                    RuntimeCall::Assets(..)
-                    | RuntimeCall::Uniques(..)
-                )
+                matches!(c, RuntimeCall::Assets(..))
             }
             ProxyType::Governance => {
                 matches!(
@@ -1016,35 +1010,6 @@ impl pallet_proxy::Config for Runtime {
     type AnnouncementDepositFactor = ConstU128<{ MILLIAST * 660 }>;
 }
 
-parameter_types! {
-	pub const UniquesCollectionDeposit: Balance = AST / 10;
-	pub const UniquesItemDeposit: Balance = AST / 1_000;
-	pub const UniquesMetadataDepositBase: Balance = deposit(1, 129);
-	pub const UniquesAttributeDepositBase: Balance = deposit(1, 0);
-	pub const UniquesDepositPerByte: Balance = deposit(0, 1);
-}
-
-impl pallet_uniques::Config for Runtime {
-	type RuntimeEvent = RuntimeEvent;
-	type CollectionId = u32;
-	type ItemId = u128;
-	type Currency = Balances;
-	type ForceOrigin = AssetsForceOrigin;
-	type CollectionDeposit = UniquesCollectionDeposit;
-	type ItemDeposit = UniquesItemDeposit;
-	type MetadataDepositBase = UniquesMetadataDepositBase;
-	type AttributeDepositBase = UniquesAttributeDepositBase;
-	type DepositPerByte = UniquesDepositPerByte;
-	type StringLimit = ConstU32<128>;
-	type KeyLimit = ConstU32<32>;
-	type ValueLimit = ConstU32<64>;
-	type WeightInfo = weights::pallet_uniques::WeightInfo<Runtime>;
-	#[cfg(feature = "runtime-benchmarks")]
-	type Helper = ();
-	type CreateOrigin = AsEnsureOriginWithArg<EnsureSigned<AccountId>>;
-	type Locker = ();
-}
-
 // TODO: remove this once https://github.com/paritytech/substrate/issues/12161 is resolved
 #[rustfmt::skip]
 construct_runtime!(
@@ -1081,7 +1046,6 @@ construct_runtime!(
         Preimage: pallet_preimage,
         EthereumChecked: pallet_ethereum_checked,
         UnifiedAccounts: pallet_unified_accounts,
-        Uniques: pallet_uniques,
     }
 );
 
@@ -1190,7 +1154,6 @@ mod benches {
     define_benchmarks!(
         [frame_benchmarking, BaselineBench::<Runtime>]
         [pallet_assets, Assets]
-        [pallet_uniques, Uniques]
         [frame_system, SystemBench::<Runtime>]
         [pallet_balances, Balances]
         [pallet_timestamp, Timestamp]

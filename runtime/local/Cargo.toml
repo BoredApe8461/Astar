@@ -39,7 +39,6 @@ pallet-grandpa = { workspace = true }
 pallet-insecure-randomness-collective-flip = { workspace = true }
 pallet-preimage = { workspace = true }
 pallet-proxy = { workspace = true }
-pallet-uniques = { workspace = true }
 pallet-scheduler = { workspace = true }
 pallet-sudo = { workspace = true }
 pallet-timestamp = { workspace = true }
