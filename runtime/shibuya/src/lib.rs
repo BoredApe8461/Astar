@@ -675,6 +675,7 @@ impl pallet_contracts::Config for Runtime {
         XvmExtension<Self, Xvm, UnifiedAccounts>,
         AssetsExtension<Self, pallet_chain_extension_assets::weights::SubstrateWeight<Self>>,
         UnifiedAccountsExtension<Self, UnifiedAccounts>,
+        UniquesExtension<Self, pallet_chain_extension_uniques::weights::SubstrateWeight<Self>>,
     );
     type Schedule = Schedule;
     type AddressGenerator = pallet_contracts::DefaultAddressGenerator;

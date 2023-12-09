@@ -22,7 +22,6 @@ pub mod weights;
 
 use frame_support::traits::nonfungibles::{Inspect, InspectEnumerable};
 use frame_system::RawOrigin;
-use nfts_chain_extension_types::{select_origin, Origin, Outcome};
 use pallet_contracts::chain_extension::{
     ChainExtension, Environment, Ext, InitState, RetVal, SysConfig,
 };
@@ -33,10 +32,11 @@ use sp_runtime::BoundedVec;
 use sp_runtime::DispatchError;
 use sp_std::marker::PhantomData;
 use sp_std::vec::Vec;
+use uniques_chain_extension_types::{select_origin, Origin, Outcome};
 
 type AccountIdLookup<T> = <<T as SysConfig>::Lookup as StaticLookup>::Source;
 
-enum NftsFunc {
+enum UniquesFunc {
     Create,
     Transfer,
     Mint,
@@ -70,57 +70,59 @@ enum NftsFunc {
     OwnedInCollection,
 }
 
-impl TryFrom<u16> for NftsFunc {
+impl TryFrom<u16> for UniquesFunc {
     type Error = DispatchError;
 
     fn try_from(value: u16) -> Result<Self, Self::Error> {
         match value {
-            1 => Ok(NftsFunc::Create),
-            2 => Ok(NftsFunc::Transfer),
-            3 => Ok(NftsFunc::Mint),
-            4 => Ok(NftsFunc::Redeposit),
-            5 => Ok(NftsFunc::Burn),
-            6 => Ok(NftsFunc::Destroy),
-            7 => Ok(NftsFunc::ApproveTransfer),
-            8 => Ok(NftsFunc::CancelApproval),
-            9 => Ok(NftsFunc::Freeze),
-            10 => Ok(NftsFunc::Thaw),
-            11 => Ok(NftsFunc::FreezeCollection),
-            12 => Ok(NftsFunc::ThawCollection),
-            13 => Ok(NftsFunc::TransferOwnership),
-            14 => Ok(NftsFunc::SetTeam),
-            15 => Ok(NftsFunc::SetAttribute),
-            16 => Ok(NftsFunc::ClearAttribute),
-            17 => Ok(NftsFunc::SetMetadata),
-            18 => Ok(NftsFunc::ClearMetadata),
-            19 => Ok(NftsFunc::SetCollectionMetadata),
-            20 => Ok(NftsFunc::ClearCollectionMetadata),
-            21 => Ok(NftsFunc::SetAcceptOwnership),
-            22 => Ok(NftsFunc::SetCollectionMaxSupply),
-            23 => Ok(NftsFunc::Owner),
-            24 => Ok(NftsFunc::CollectionOwner),
-            25 => Ok(NftsFunc::Attribute),
-            26 => Ok(NftsFunc::CollectionAttribute),
-            27 => Ok(NftsFunc::CanTransfer),
-            28 => Ok(NftsFunc::Collections),
-            29 => Ok(NftsFunc::Items),
-            30 => Ok(NftsFunc::Owned),
-            31 => Ok(NftsFunc::OwnedInCollection),
-            _ => Err(DispatchError::Other("Unimplemented func_id for NftsFunc")),
+            1 => Ok(UniquesFunc::Create),
+            2 => Ok(UniquesFunc::Transfer),
+            3 => Ok(UniquesFunc::Mint),
+            4 => Ok(UniquesFunc::Redeposit),
+            5 => Ok(UniquesFunc::Burn),
+            6 => Ok(UniquesFunc::Destroy),
+            7 => Ok(UniquesFunc::ApproveTransfer),
+            8 => Ok(UniquesFunc::CancelApproval),
+            9 => Ok(UniquesFunc::Freeze),
+            10 => Ok(UniquesFunc::Thaw),
+            11 => Ok(UniquesFunc::FreezeCollection),
+            12 => Ok(UniquesFunc::ThawCollection),
+            13 => Ok(UniquesFunc::TransferOwnership),
+            14 => Ok(UniquesFunc::SetTeam),
+            15 => Ok(UniquesFunc::SetAttribute),
+            16 => Ok(UniquesFunc::ClearAttribute),
+            17 => Ok(UniquesFunc::SetMetadata),
+            18 => Ok(UniquesFunc::ClearMetadata),
+            19 => Ok(UniquesFunc::SetCollectionMetadata),
+            20 => Ok(UniquesFunc::ClearCollectionMetadata),
+            21 => Ok(UniquesFunc::SetAcceptOwnership),
+            22 => Ok(UniquesFunc::SetCollectionMaxSupply),
+            23 => Ok(UniquesFunc::Owner),
+            24 => Ok(UniquesFunc::CollectionOwner),
+            25 => Ok(UniquesFunc::Attribute),
+            26 => Ok(UniquesFunc::CollectionAttribute),
+            27 => Ok(UniquesFunc::CanTransfer),
+            28 => Ok(UniquesFunc::Collections),
+            29 => Ok(UniquesFunc::Items),
+            30 => Ok(UniquesFunc::Owned),
+            31 => Ok(UniquesFunc::OwnedInCollection),
+            _ => Err(DispatchError::Other(
+                "Unimplemented func_id for UniquesFunc",
+            )),
         }
     }
 }
 
-/// Pallet Nfts chain extension.
-pub struct NftsExtension<T, W>(PhantomData<(T, W)>);
+/// Pallet Uniques chain extension.
+pub struct UniquesExtension<T, W>(PhantomData<(T, W)>);
 
-impl<T, W> Default for NftsExtension<T, W> {
+impl<T, W> Default for UniquesExtension<T, W> {
     fn default() -> Self {
-        NftsExtension(PhantomData)
+        UniquesExtension(PhantomData)
     }
 }
 
-impl<T, W> ChainExtension<T> for NftsExtension<T, W>
+impl<T, W> ChainExtension<T> for UniquesExtension<T, W>
 where
     T: pallet_uniques::Config + pallet_contracts::Config,
     AccountIdLookup<T>: From<<T as SysConfig>::AccountId>,
@@ -135,7 +137,7 @@ where
         let mut env = env.buf_in_buf_out();
 
         match func_id {
-            NftsFunc::Create => {
+            UniquesFunc::Create => {
                 let (origin, collection_id, admin): (
                     Origin,
                     <T as pallet_uniques::Config>::CollectionId,
@@ -161,7 +163,7 @@ where
                     Ok(_) => Ok(RetVal::Converging(Outcome::Success as u32)),
                 };
             }
-            NftsFunc::Destroy => {
+            UniquesFunc::Destroy => {
                 let (origin, collection_id, witness): (
                     Origin,
                     <T as pallet_uniques::Config>::CollectionId,
@@ -191,7 +193,7 @@ where
                     Ok(_) => Ok(RetVal::Converging(Outcome::Success as u32)),
                 };
             }
-            NftsFunc::Transfer => {
+            UniquesFunc::Transfer => {
                 let (origin, collection_id, item, dest): (
                     Origin,
                     <T as pallet_uniques::Config>::CollectionId,
@@ -219,7 +221,7 @@ where
                     Ok(_) => Ok(RetVal::Converging(Outcome::Success as u32)),
                 };
             }
-            NftsFunc::Mint => {
+            UniquesFunc::Mint => {
                 let (origin, collection_id, item, owner): (
                     Origin,
                     <T as pallet_uniques::Config>::CollectionId,
@@ -247,7 +249,7 @@ where
                     Ok(_) => Ok(RetVal::Converging(Outcome::Success as u32)),
                 };
             }
-            NftsFunc::Burn => {
+            UniquesFunc::Burn => {
                 let (origin, collection_id, item, check_owner): (
                     Origin,
                     <T as pallet_uniques::Config>::CollectionId,
@@ -276,7 +278,7 @@ where
                     Ok(_) => Ok(RetVal::Converging(Outcome::Success as u32)),
                 };
             }
-            NftsFunc::Redeposit => {
+            UniquesFunc::Redeposit => {
                 let (origin, collection_id, items): (
                     Origin,
                     <T as pallet_uniques::Config>::CollectionId,
@@ -303,7 +305,7 @@ where
                     Ok(_) => Ok(RetVal::Converging(Outcome::Success as u32)),
                 };
             }
-            NftsFunc::Freeze => {
+            UniquesFunc::Freeze => {
                 let (origin, collection_id, item): (
                     Origin,
                     <T as pallet_uniques::Config>::CollectionId,
@@ -329,7 +331,7 @@ where
                     Ok(_) => Ok(RetVal::Converging(Outcome::Success as u32)),
                 };
             }
-            NftsFunc::Thaw => {
+            UniquesFunc::Thaw => {
                 let (origin, collection_id, item): (
                     Origin,
                     <T as pallet_uniques::Config>::CollectionId,
@@ -355,7 +357,7 @@ where
                     Ok(_) => Ok(RetVal::Converging(Outcome::Success as u32)),
                 };
             }
-            NftsFunc::FreezeCollection => {
+            UniquesFunc::FreezeCollection => {
                 let (origin, collection_id): (Origin, <T as pallet_uniques::Config>::CollectionId) =
                     env.read_as()?;
 
@@ -377,7 +379,7 @@ where
                     Ok(_) => Ok(RetVal::Converging(Outcome::Success as u32)),
                 };
             }
-            NftsFunc::ThawCollection => {
+            UniquesFunc::ThawCollection => {
                 let (origin, collection_id): (Origin, <T as pallet_uniques::Config>::CollectionId) =
                     env.read_as()?;
 
@@ -399,7 +401,7 @@ where
                     Ok(_) => Ok(RetVal::Converging(Outcome::Success as u32)),
                 };
             }
-            NftsFunc::TransferOwnership => {
+            UniquesFunc::TransferOwnership => {
                 let (origin, collection_id, owner): (
                     Origin,
                     <T as pallet_uniques::Config>::CollectionId,
@@ -425,7 +427,7 @@ where
                     Ok(_) => Ok(RetVal::Converging(Outcome::Success as u32)),
                 };
             }
-            NftsFunc::SetTeam => {
+            UniquesFunc::SetTeam => {
                 let (origin, collection_id, issuer, admin, freezer): (
                     Origin,
                     <T as pallet_uniques::Config>::CollectionId,
@@ -455,7 +457,7 @@ where
                     Ok(_) => Ok(RetVal::Converging(Outcome::Success as u32)),
                 };
             }
-            NftsFunc::ApproveTransfer => {
+            UniquesFunc::ApproveTransfer => {
                 let (origin, collection_id, item, delegate): (
                     Origin,
                     <T as pallet_uniques::Config>::CollectionId,
@@ -483,7 +485,7 @@ where
                     Ok(_) => Ok(RetVal::Converging(Outcome::Success as u32)),
                 };
             }
-            NftsFunc::CancelApproval => {
+            UniquesFunc::CancelApproval => {
                 let (origin, collection_id, item, maybe_check_delegate): (
                     Origin,
                     <T as pallet_uniques::Config>::CollectionId,
@@ -513,7 +515,7 @@ where
                     Ok(_) => Ok(RetVal::Converging(Outcome::Success as u32)),
                 };
             }
-            NftsFunc::SetAttribute => {
+            UniquesFunc::SetAttribute => {
                 let (origin, collection_id, maybe_item, key, value): (
                     Origin,
                     <T as pallet_uniques::Config>::CollectionId,
@@ -543,7 +545,7 @@ where
                     Ok(_) => Ok(RetVal::Converging(Outcome::Success as u32)),
                 };
             }
-            NftsFunc::ClearAttribute => {
+            UniquesFunc::ClearAttribute => {
                 let (origin, collection_id, maybe_item, key): (
                     Origin,
                     <T as pallet_uniques::Config>::CollectionId,
@@ -571,7 +573,7 @@ where
                     Ok(_) => Ok(RetVal::Converging(Outcome::Success as u32)),
                 };
             }
-            NftsFunc::SetMetadata => {
+            UniquesFunc::SetMetadata => {
                 let (origin, collection_id, item, data, is_frozen): (
                     Origin,
                     <T as pallet_uniques::Config>::CollectionId,
@@ -601,7 +603,7 @@ where
                     Ok(_) => Ok(RetVal::Converging(Outcome::Success as u32)),
                 };
             }
-            NftsFunc::ClearMetadata => {
+            UniquesFunc::ClearMetadata => {
                 let (origin, collection_id, item): (
                     Origin,
                     <T as pallet_uniques::Config>::CollectionId,
@@ -627,7 +629,7 @@ where
                     Ok(_) => Ok(RetVal::Converging(Outcome::Success as u32)),
                 };
             }
-            NftsFunc::SetCollectionMetadata => {
+            UniquesFunc::SetCollectionMetadata => {
                 let (origin, collection_id, data, is_frozen): (
                     Origin,
                     <T as pallet_uniques::Config>::CollectionId,
@@ -656,7 +658,7 @@ where
                     Ok(_) => Ok(RetVal::Converging(Outcome::Success as u32)),
                 };
             }
-            NftsFunc::ClearCollectionMetadata => {
+            UniquesFunc::ClearCollectionMetadata => {
                 let (origin, collection_id): (Origin, <T as pallet_uniques::Config>::CollectionId) =
                     env.read_as()?;
 
@@ -679,7 +681,7 @@ where
                     Ok(_) => Ok(RetVal::Converging(Outcome::Success as u32)),
                 };
             }
-            NftsFunc::SetAcceptOwnership => {
+            UniquesFunc::SetAcceptOwnership => {
                 let (origin, maybe_collection_id): (
                     Origin,
                     Option<<T as pallet_uniques::Config>::CollectionId>,
@@ -703,7 +705,7 @@ where
                     Ok(_) => Ok(RetVal::Converging(Outcome::Success as u32)),
                 };
             }
-            NftsFunc::SetCollectionMaxSupply => {
+            UniquesFunc::SetCollectionMaxSupply => {
                 let (origin, collection_id, max_supply): (
                     Origin,
                     <T as pallet_uniques::Config>::CollectionId,
@@ -730,7 +732,7 @@ where
                     Ok(_) => Ok(RetVal::Converging(Outcome::Success as u32)),
                 };
             }
-            NftsFunc::Owner => {
+            UniquesFunc::Owner => {
                 let (collection_id, item): (
                     <T as pallet_uniques::Config>::CollectionId,
                     <T as pallet_uniques::Config>::ItemId,
@@ -742,7 +744,7 @@ where
                 let owner = pallet_uniques::Pallet::<T>::owner(collection_id, item);
                 env.write(&owner.encode(), false, None)?;
             }
-            NftsFunc::CollectionOwner => {
+            UniquesFunc::CollectionOwner => {
                 let collection_id: <T as pallet_uniques::Config>::CollectionId = env.read_as()?;
 
                 let base_weight = <W as weights::WeightInfo>::collection_owner();
@@ -751,7 +753,7 @@ where
                 let owner = pallet_uniques::Pallet::<T>::collection_owner(collection_id);
                 env.write(&owner.encode(), false, None)?;
             }
-            NftsFunc::Attribute => {
+            UniquesFunc::Attribute => {
                 let (collection_id, item, key): (
                     <T as pallet_uniques::Config>::CollectionId,
                     <T as pallet_uniques::Config>::ItemId,
@@ -764,7 +766,7 @@ where
                 let attribute = pallet_uniques::Pallet::<T>::attribute(&collection_id, &item, &key);
                 env.write(&attribute.encode(), false, None)?;
             }
-            NftsFunc::CollectionAttribute => {
+            UniquesFunc::CollectionAttribute => {
                 let (collection_id, key): (
                     <T as pallet_uniques::Config>::CollectionId,
                     BoundedVec<u8, <T as pallet_uniques::Config>::KeyLimit>,
@@ -777,7 +779,7 @@ where
                     pallet_uniques::Pallet::<T>::collection_attribute(&collection_id, &key);
                 env.write(&attribute.encode(), false, None)?;
             }
-            NftsFunc::CanTransfer => {
+            UniquesFunc::CanTransfer => {
                 let (collection_id, item): (
                     <T as pallet_uniques::Config>::CollectionId,
                     <T as pallet_uniques::Config>::ItemId,
@@ -789,7 +791,7 @@ where
                 let can_transfer = pallet_uniques::Pallet::<T>::can_transfer(&collection_id, &item);
                 env.write(&can_transfer.encode(), false, None)?;
             }
-            NftsFunc::Collections => {
+            UniquesFunc::Collections => {
                 let read_bound: u32 = env.read_as()?;
 
                 let base_weight = <W as weights::WeightInfo>::collections(read_bound);
@@ -800,7 +802,7 @@ where
 
                 env.write(&collections.encode(), false, None)?;
             }
-            NftsFunc::Items => {
+            UniquesFunc::Items => {
                 let (collection_id, read_bound): (
                     <T as pallet_uniques::Config>::CollectionId,
                     u32,
@@ -814,7 +816,7 @@ where
 
                 env.write(&items.encode(), false, None)?;
             }
-            NftsFunc::Owned => {
+            UniquesFunc::Owned => {
                 let (who, read_bound): (T::AccountId, u32) = env.read_as()?;
 
                 let items: Vec<(
@@ -827,7 +829,7 @@ where
 
                 env.write(&items.encode(), false, None)?;
             }
-            NftsFunc::OwnedInCollection => {
+            UniquesFunc::OwnedInCollection => {
                 let (who, collection_id, read_bound): (
                     T::AccountId,
                     <T as pallet_uniques::Config>::CollectionId,
