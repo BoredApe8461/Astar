@@ -39,6 +39,7 @@ pallet-grandpa = { workspace = true }
 pallet-insecure-randomness-collective-flip = { workspace = true }
 pallet-preimage = { workspace = true }
 pallet-proxy = { workspace = true }
+pallet-uniques = { workspace = true }
 pallet-scheduler = { workspace = true }
 pallet-sudo = { workspace = true }
 pallet-timestamp = { workspace = true }
@@ -86,6 +87,7 @@ moonbeam-rpc-primitives-txpool = { workspace = true, optional = true }
 
 # chain-extensions
 pallet-chain-extension-assets = { workspace = true }
+pallet-chain-extension-uniques = { workspace = true }
 
 # benchmarking
 array-bytes = { workspace = true }
@@ -142,6 +144,7 @@ std = [
 	"pallet-utility/std",
 	"pallet-vesting/std",
 	"pallet-proxy/std",
+	"pallet-uniques/std",
 	"sp-api/std",
 	"sp-block-builder/std",
 	"sp-consensus-aura/std",
@@ -168,6 +171,7 @@ std = [
 	"moonbeam-rpc-primitives-txpool/std",
 	"substrate-wasm-builder",
 	"pallet-chain-extension-assets/std",
+	"pallet-chain-extension-uniques/std",
 	"astar-primitives/std",
 ]
 runtime-benchmarks = [
@@ -216,6 +220,7 @@ try-runtime = [
 	"pallet-democracy/try-runtime",
 	"pallet-collective/try-runtime",
 	"pallet-proxy/try-runtime",
+	"pallet-uniques/try-runtime",
 	"pallet-treasury/try-runtime",
 	"pallet-preimage/try-runtime",
 	"pallet-dynamic-evm-base-fee/try-runtime",
