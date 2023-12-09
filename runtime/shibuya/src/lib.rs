@@ -94,7 +94,6 @@ mod weights;
 mod xcm_config;
 
 pub type ShibuyaAssetLocationIdConverter = AssetLocationIdConverter<AssetId, XcAssetConfig>;
-pub type ShibuyaUniquesLocationIdConverter = AssetLocationIdConverter<ItemId, XcUniquesConfig>;
 
 pub use precompiles::{ShibuyaNetworkPrecompiles, ASSET_PRECOMPILE_ADDRESS_PREFIX};
 pub type Precompiles = ShibuyaNetworkPrecompiles<Runtime, ShibuyaAssetLocationIdConverter>;
@@ -103,7 +102,7 @@ use chain_extensions::*;
 
 pub type AssetsForceOrigin = EnsureRoot<AccountId>;
 
-pub type CollectionId = u32;
+pub type CollectionId = u128;
 pub type ItemId = u128;
 
 /// Constant values used within the runtime.

@@ -19,9 +19,8 @@
 use super::{
     AccountId, AllPalletsWithSystem, AssetId, Assets, Balance, Balances, CollectionId,
     DealWithFees, ItemId, ParachainInfo, ParachainSystem, PolkadotXcm, Runtime, RuntimeCall,
-    RuntimeEvent, RuntimeOrigin, ShibuyaAssetLocationIdConverter,
-    ShibuyaUniquesLocationIdConverter, TreasuryAccountId, Uniques, XcAssetConfig, XcmWeightToFee,
-    XcmpQueue,
+    RuntimeEvent, RuntimeOrigin, ShibuyaAssetLocationIdConverter, TreasuryAccountId, Uniques,
+    XcAssetConfig, XcmWeightToFee, XcmpQueue,
 };
 use crate::weights;
 use frame_support::{
@@ -33,15 +32,16 @@ use frame_system::EnsureRoot;
 use sp_runtime::traits::Convert;
 
 // Polkadot imports
+use pallet_xc_asset_config::XcAssetLocation;
 use xcm::latest::prelude::*;
 use xcm_builder::{
     AccountId32Aliases, AllowKnownQueryResponses, AllowSubscriptionsFrom,
-    AllowTopLevelPaidExecutionFrom, AllowUnpaidExecutionFrom, AsPrefixedGeneralIndex,
-    ConvertedConcreteId, CurrencyAdapter, EnsureXcmOrigin, FixedWeightBounds, FungiblesAdapter,
-    IsConcrete, NoChecking, NonFungiblesAdapter, ParentAsSuperuser, ParentIsPreset,
-    RelayChainAsNative, SiblingParachainAsNative, SiblingParachainConvertsVia,
-    SignedAccountId32AsNative, SignedToAccountId32, SovereignSignedViaLocation, TakeWeightCredit,
-    UsingComponents, WithComputedOrigin,
+    AllowTopLevelPaidExecutionFrom, AllowUnpaidExecutionFrom, ConvertedConcreteId, CurrencyAdapter,
+    EnsureXcmOrigin, FixedWeightBounds, FungiblesAdapter, IsConcrete, NoChecking,
+    NonFungiblesAdapter, ParentAsSuperuser, ParentIsPreset, RelayChainAsNative,
+    SiblingParachainAsNative, SiblingParachainConvertsVia, SignedAccountId32AsNative,
+    SignedToAccountId32, SovereignSignedViaLocation, TakeWeightCredit, UsingComponents,
+    WithComputedOrigin,
 };
 use xcm_executor::{
     traits::{Convert as XcmConvert, Error as MatchError, JustTry, MatchesNonFungibles},
@@ -119,9 +119,7 @@ impl MatchesNonFungibles<CollectionId, ItemId> for MultiAssetToUniquesConverter 
             (NonFungible(ref instance), Concrete(ref class)) => (instance, class),
             _ => return Err(MatchError::AssetNotHandled),
         };
-        // TODO use the XcUniquesConfig for converting:
-
-        let collection_id = 0;
+        let collection_id = XcAssetConfig::get_asset_id(*class).unwrap();
 
         let item_id = match instance {
             Index(indx) => *indx,
