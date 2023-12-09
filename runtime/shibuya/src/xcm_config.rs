@@ -17,9 +17,11 @@
 // along with Astar. If not, see <http://www.gnu.org/licenses/>.
 
 use super::{
-    AccountId, AllPalletsWithSystem, AssetId, Assets, CollectionId, ItemId, Uniques, Balance, Balances, DealWithFees,
-    ParachainInfo, ParachainSystem, PolkadotXcm, Runtime, RuntimeCall, RuntimeEvent, RuntimeOrigin,
-    ShibuyaAssetLocationIdConverter, ShibuyaUniquesLocationIdConverter, TreasuryAccountId, XcAssetConfig, XcmWeightToFee, XcmpQueue,
+    AccountId, AllPalletsWithSystem, AssetId, Assets, Balance, Balances, CollectionId,
+    DealWithFees, ItemId, ParachainInfo, ParachainSystem, PolkadotXcm, Runtime, RuntimeCall,
+    RuntimeEvent, RuntimeOrigin, ShibuyaAssetLocationIdConverter,
+    ShibuyaUniquesLocationIdConverter, TreasuryAccountId, Uniques, XcAssetConfig, XcmWeightToFee,
+    XcmpQueue,
 };
 use crate::weights;
 use frame_support::{
@@ -32,16 +34,17 @@ use sp_runtime::traits::Convert;
 
 // Polkadot imports
 use xcm::latest::prelude::*;
-use xcm_builder::{AsPrefixedGeneralIndex,
+use xcm_builder::{
     AccountId32Aliases, AllowKnownQueryResponses, AllowSubscriptionsFrom,
-    AllowTopLevelPaidExecutionFrom, AllowUnpaidExecutionFrom, ConvertedConcreteId, CurrencyAdapter,
-    EnsureXcmOrigin, FixedWeightBounds, FungiblesAdapter, NonFungiblesAdapter, IsConcrete, NoChecking,
-    ParentAsSuperuser, ParentIsPreset, RelayChainAsNative, SiblingParachainAsNative,
-    SiblingParachainConvertsVia, SignedAccountId32AsNative, SignedToAccountId32,
-    SovereignSignedViaLocation, TakeWeightCredit, UsingComponents, WithComputedOrigin,
+    AllowTopLevelPaidExecutionFrom, AllowUnpaidExecutionFrom, AsPrefixedGeneralIndex,
+    ConvertedConcreteId, CurrencyAdapter, EnsureXcmOrigin, FixedWeightBounds, FungiblesAdapter,
+    IsConcrete, NoChecking, NonFungiblesAdapter, ParentAsSuperuser, ParentIsPreset,
+    RelayChainAsNative, SiblingParachainAsNative, SiblingParachainConvertsVia,
+    SignedAccountId32AsNative, SignedToAccountId32, SovereignSignedViaLocation, TakeWeightCredit,
+    UsingComponents, WithComputedOrigin,
 };
 use xcm_executor::{
-    traits::{Convert as XcmConvert, JustTry},
+    traits::{Convert as XcmConvert, Error as MatchError, JustTry, MatchesNonFungibles},
     XcmExecutor,
 };
 
@@ -109,10 +112,30 @@ pub type FungiblesTransactor = FungiblesAdapter<
     DummyCheckingAccount,
 >;
 
+pub struct MultiAssetToUniquesConverter;
+impl MatchesNonFungibles<CollectionId, ItemId> for MultiAssetToUniquesConverter {
+    fn matches_nonfungibles(a: &MultiAsset) -> Result<(CollectionId, ItemId), MatchError> {
+        let (instance, class) = match (&a.fun, &a.id) {
+            (NonFungible(ref instance), Concrete(ref class)) => (instance, class),
+            _ => return Err(MatchError::AssetNotHandled),
+        };
+        // TODO use the XcUniquesConfig for converting:
+
+        let collection_id = 0;
+
+        let item_id = match instance {
+            Index(indx) => *indx,
+            _ => todo!(),
+        };
+
+        Ok((collection_id, item_id))
+    }
+}
+
 pub type NonFungiblesTransactor = NonFungiblesAdapter<
     // Use the uniques pallet:
     Uniques,
-    ConvertedConcreteId<CollectionId, ItemId, AsPrefixedGeneralIndex<(), u32, JustTry>, JustTry>,
+    MultiAssetToUniquesConverter,
     LocationToAccountId,
     AccountId,
     // We don't support teleport so no need to check any assets.
@@ -122,7 +145,11 @@ pub type NonFungiblesTransactor = NonFungiblesAdapter<
 >;
 
 /// Means for transacting assets on this chain.
-pub type AssetTransactors = (CurrencyTransactor, FungiblesTransactor, NonFungiblesTransactor);
+pub type AssetTransactors = (
+    CurrencyTransactor,
+    FungiblesTransactor,
+    NonFungiblesTransactor,
+);
 
 /// This is the type we use to convert an (incoming) XCM origin into a local `Origin` instance,
 /// ready for dispatching a transaction with Xcm's `Transact`. There is an `OriginKind` which can

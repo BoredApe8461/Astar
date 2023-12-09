@@ -69,7 +69,7 @@ use sp_std::prelude::*;
 
 pub use astar_primitives::{
     ethereum_checked::CheckedEthereumTransact, evm::EvmRevertCodeHandler,
-    xcm::{AssetLocationIdConverter}, AccountId, Address, AssetId, Balance, BlockNumber, Hash, Header,
+    xcm::AssetLocationIdConverter, AccountId, Address, AssetId, Balance, BlockNumber, Hash, Header,
     Index, Signature,
 };
 pub use pallet_block_rewards_hybrid::RewardDistributionConfig;
@@ -1153,11 +1153,7 @@ impl InstanceFilter<RuntimeCall> for ProxyType {
             }
             // All Runtime calls from Pallet Assets allowed for proxy account
             ProxyType::Assets => {
-                matches!(
-                    c, 
-                    RuntimeCall::Assets(..)
-                    | RuntimeCall::Uniques(..)
-                )
+                matches!(c, RuntimeCall::Assets(..) | RuntimeCall::Uniques(..))
             }
             ProxyType::Governance => {
                 matches!(
@@ -1236,7 +1232,7 @@ impl pallet_xc_asset_config::Config<pallet_xc_asset_config::Instance1> for Runti
 
 impl pallet_xc_asset_config::Config<pallet_xc_asset_config::Instance2> for Runtime {
     type RuntimeEvent = RuntimeEvent;
-    type AssetId = ItemId;
+    type AssetId = (CollectionId, ItemId);
     // Good enough for testnet since we lack pallet-assets hooks for now
     type ManagerOrigin = EnsureRoot<AccountId>;
     type WeightInfo = pallet_xc_asset_config::weights::SubstrateWeight<Self>;
@@ -1256,34 +1252,33 @@ impl pallet_unified_accounts::Config for Runtime {
     type WeightInfo = pallet_unified_accounts::weights::SubstrateWeight<Self>;
 }
 
-
 parameter_types! {
-	pub const UniquesCollectionDeposit: Balance = SBY / 10;
-	pub const UniquesItemDeposit: Balance = SBY / 1_000;
-	pub const UniquesMetadataDepositBase: Balance = deposit(1, 129);
-	pub const UniquesAttributeDepositBase: Balance = deposit(1, 0);
-	pub const UniquesDepositPerByte: Balance = deposit(0, 1);
+    pub const UniquesCollectionDeposit: Balance = SBY / 10;
+    pub const UniquesItemDeposit: Balance = SBY / 1_000;
+    pub const UniquesMetadataDepositBase: Balance = deposit(1, 129);
+    pub const UniquesAttributeDepositBase: Balance = deposit(1, 0);
+    pub const UniquesDepositPerByte: Balance = deposit(0, 1);
 }
 
 impl pallet_uniques::Config for Runtime {
-	type RuntimeEvent = RuntimeEvent;
-	type CollectionId = CollectionId;
-	type ItemId = u32; // TODO FIXME
-	type Currency = Balances;
-	type ForceOrigin = AssetsForceOrigin;
-	type CollectionDeposit = UniquesCollectionDeposit;
-	type ItemDeposit = UniquesItemDeposit;
-	type MetadataDepositBase = UniquesMetadataDepositBase;
-	type AttributeDepositBase = UniquesAttributeDepositBase;
-	type DepositPerByte = UniquesDepositPerByte;
-	type StringLimit = ConstU32<128>;
-	type KeyLimit = ConstU32<32>;
-	type ValueLimit = ConstU32<64>;
-	type WeightInfo = weights::pallet_uniques::WeightInfo<Runtime>;
-	#[cfg(feature = "runtime-benchmarks")]
-	type Helper = ();
-	type CreateOrigin = AsEnsureOriginWithArg<EnsureSigned<AccountId>>;
-	type Locker = ();
+    type RuntimeEvent = RuntimeEvent;
+    type CollectionId = CollectionId;
+    type ItemId = ItemId;
+    type Currency = Balances;
+    type ForceOrigin = AssetsForceOrigin;
+    type CollectionDeposit = UniquesCollectionDeposit;
+    type ItemDeposit = UniquesItemDeposit;
+    type MetadataDepositBase = UniquesMetadataDepositBase;
+    type AttributeDepositBase = UniquesAttributeDepositBase;
+    type DepositPerByte = UniquesDepositPerByte;
+    type StringLimit = ConstU32<128>;
+    type KeyLimit = ConstU32<32>;
+    type ValueLimit = ConstU32<64>;
+    type WeightInfo = weights::pallet_uniques::WeightInfo<Runtime>;
+    #[cfg(feature = "runtime-benchmarks")]
+    type Helper = ();
+    type CreateOrigin = AsEnsureOriginWithArg<EnsureSigned<AccountId>>;
+    type Locker = ();
 }
 
 construct_runtime!(

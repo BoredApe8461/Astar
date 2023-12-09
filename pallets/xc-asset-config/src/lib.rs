@@ -117,7 +117,8 @@ pub mod pallet {
 
     #[pallet::config]
     pub trait Config<I: 'static = ()>: frame_system::Config {
-        type RuntimeEvent: From<Event<Self, I>> + IsType<<Self as frame_system::Config>::RuntimeEvent>;
+        type RuntimeEvent: From<Event<Self, I>>
+            + IsType<<Self as frame_system::Config>::RuntimeEvent>;
 
         /// The Asset Id. This will be used to create the asset and to associate it with
         /// a AssetLocation
@@ -274,8 +275,8 @@ pub mod pallet {
                 .map_err(|_| Error::<T, I>::MultiLocationNotSupported)?;
             let new_asset_location = VersionedMultiLocation::V3(v3_asset_loc);
 
-            let previous_asset_location =
-                AssetIdToLocation::<T, I>::get(&asset_id).ok_or(Error::<T, I>::AssetDoesNotExist)?;
+            let previous_asset_location = AssetIdToLocation::<T, I>::get(&asset_id)
+                .ok_or(Error::<T, I>::AssetDoesNotExist)?;
 
             // Insert new asset type info
             AssetIdToLocation::<T, I>::insert(&asset_id, new_asset_location.clone());
@@ -285,7 +286,8 @@ pub mod pallet {
             AssetLocationToId::<T, I>::remove(&previous_asset_location);
 
             // Change AssetLocationUnitsPerSecond
-            if let Some(units) = AssetLocationUnitsPerSecond::<T, I>::take(&previous_asset_location) {
+            if let Some(units) = AssetLocationUnitsPerSecond::<T, I>::take(&previous_asset_location)
+            {
                 AssetLocationUnitsPerSecond::<T, I>::insert(&new_asset_location, units);
             }
 
@@ -321,14 +323,11 @@ pub mod pallet {
         /// Removes all information related to asset, removing it from XCM support.
         #[pallet::call_index(4)]
         #[pallet::weight(T::WeightInfo::remove_asset())]
-        pub fn remove_asset(
-            origin: OriginFor<T>,
-            asset_id: T::AssetId,
-        ) -> DispatchResult {
+        pub fn remove_asset(origin: OriginFor<T>, asset_id: T::AssetId) -> DispatchResult {
             T::ManagerOrigin::ensure_origin(origin)?;
 
-            let asset_location =
-                AssetIdToLocation::<T, I>::get(&asset_id).ok_or(Error::<T, I>::AssetDoesNotExist)?;
+            let asset_location = AssetIdToLocation::<T, I>::get(&asset_id)
+                .ok_or(Error::<T, I>::AssetDoesNotExist)?;
 
             AssetIdToLocation::<T, I>::remove(&asset_id);
             AssetLocationToId::<T, I>::remove(&asset_location);

@@ -66,7 +66,8 @@ impl<T: Config<I>, I: 'static> OnRuntimeUpgrade for MigrationXcmV3<T, I> {
         }
 
         // 3rd map //
-        let location_to_price_entries: Vec<_> = AssetLocationUnitsPerSecond::<T, I>::drain().collect();
+        let location_to_price_entries: Vec<_> =
+            AssetLocationUnitsPerSecond::<T, I>::drain().collect();
 
         for (legacy_location, price) in location_to_price_entries {
             consumed_weight.saturating_accrue(T::DbWeight::get().reads_writes(1, 2));
