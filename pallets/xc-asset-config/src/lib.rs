@@ -74,6 +74,7 @@ pub mod pallet {
     use crate::weights::WeightInfo;
     use frame_support::{pallet_prelude::*, traits::EnsureOrigin};
     use frame_system::pallet_prelude::*;
+    use parity_scale_codec::HasCompact;
     use sp_std::boxed::Box;
     use xcm::{v3::MultiLocation, VersionedMultiLocation};
 
@@ -82,7 +83,7 @@ pub mod pallet {
     #[pallet::pallet]
     #[pallet::storage_version(STORAGE_VERSION)]
     #[pallet::without_storage_info]
-    pub struct Pallet<T, I = ()>(_);
+    pub struct Pallet<T>(PhantomData<T>);
 
     /// Defines conversion between asset Id and cross-chain asset location
     pub trait XcAssetLocation<AssetId> {
@@ -99,30 +100,29 @@ pub mod pallet {
         fn get_units_per_second(asset_location: MultiLocation) -> Option<u128>;
     }
 
-    impl<T: Config<I>, I: 'static> XcAssetLocation<T::AssetId> for Pallet<T, I> {
+    impl<T: Config> XcAssetLocation<T::AssetId> for Pallet<T> {
         fn get_xc_asset_location(asset_id: T::AssetId) -> Option<MultiLocation> {
-            AssetIdToLocation::<T, I>::get(asset_id).and_then(|x| x.try_into().ok())
+            AssetIdToLocation::<T>::get(asset_id).and_then(|x| x.try_into().ok())
         }
 
         fn get_asset_id(asset_location: MultiLocation) -> Option<T::AssetId> {
-            AssetLocationToId::<T, I>::get(asset_location.into_versioned())
+            AssetLocationToId::<T>::get(asset_location.into_versioned())
         }
     }
 
-    impl<T: Config<I>, I: 'static> ExecutionPaymentRate for Pallet<T, I> {
+    impl<T: Config> ExecutionPaymentRate for Pallet<T> {
         fn get_units_per_second(asset_location: MultiLocation) -> Option<u128> {
-            AssetLocationUnitsPerSecond::<T, I>::get(asset_location.into_versioned())
+            AssetLocationUnitsPerSecond::<T>::get(asset_location.into_versioned())
         }
     }
 
     #[pallet::config]
-    pub trait Config<I: 'static = ()>: frame_system::Config {
-        type RuntimeEvent: From<Event<Self, I>>
-            + IsType<<Self as frame_system::Config>::RuntimeEvent>;
+    pub trait Config: frame_system::Config {
+        type RuntimeEvent: From<Event<Self>> + IsType<<Self as frame_system::Config>::RuntimeEvent>;
 
         /// The Asset Id. This will be used to create the asset and to associate it with
         /// a AssetLocation
-        type AssetId: Member + Parameter + Default + Copy + MaxEncodedLen;
+        type AssetId: Member + Parameter + Default + Copy + HasCompact + MaxEncodedLen;
 
         /// The required origin for managing cross-chain asset configuration
         ///
@@ -133,7 +133,7 @@ pub mod pallet {
     }
 
     #[pallet::error]
-    pub enum Error<T, I = ()> {
+    pub enum Error<T> {
         /// Asset is already registered.
         AssetAlreadyRegistered,
         /// Asset does not exist (hasn't been registered).
@@ -144,7 +144,7 @@ pub mod pallet {
 
     #[pallet::event]
     #[pallet::generate_deposit(pub(crate) fn deposit_event)]
-    pub enum Event<T: Config<I>, I: 'static = ()> {
+    pub enum Event<T: Config> {
         /// Registed mapping between asset type and asset Id.
         AssetRegistered {
             asset_location: VersionedMultiLocation,
@@ -177,7 +177,7 @@ pub mod pallet {
     /// like transferring an asset from this chain to another.
     #[pallet::storage]
     #[pallet::getter(fn asset_id_to_location)]
-    pub type AssetIdToLocation<T: Config<I>, I: 'static = ()> =
+    pub type AssetIdToLocation<T: Config> =
         StorageMap<_, Twox64Concat, T::AssetId, VersionedMultiLocation>;
 
     /// Mapping from an asset type to an asset id.
@@ -185,7 +185,7 @@ pub mod pallet {
     /// the corresponding asset in which tokens should me minted.
     #[pallet::storage]
     #[pallet::getter(fn asset_location_to_id)]
-    pub type AssetLocationToId<T: Config<I>, I: 'static = ()> =
+    pub type AssetLocationToId<T: Config> =
         StorageMap<_, Twox64Concat, VersionedMultiLocation, T::AssetId>;
 
     /// Stores the units per second for local execution for a AssetLocation.
@@ -194,11 +194,11 @@ pub mod pallet {
     /// Not all asset types are supported for payment. If value exists here, it means it is supported.
     #[pallet::storage]
     #[pallet::getter(fn asset_location_units_per_second)]
-    pub type AssetLocationUnitsPerSecond<T: Config<I>, I: 'static = ()> =
+    pub type AssetLocationUnitsPerSecond<T: Config> =
         StorageMap<_, Twox64Concat, VersionedMultiLocation, u128>;
 
     #[pallet::call]
-    impl<T: Config<I>, I: 'static> Pallet<T, I> {
+    impl<T: Config> Pallet<T> {
         /// Register new asset location to asset Id mapping.
         ///
         /// This makes the asset eligible for XCM interaction.
@@ -207,22 +207,22 @@ pub mod pallet {
         pub fn register_asset_location(
             origin: OriginFor<T>,
             asset_location: Box<VersionedMultiLocation>,
-            asset_id: T::AssetId,
+            #[pallet::compact] asset_id: T::AssetId,
         ) -> DispatchResult {
             T::ManagerOrigin::ensure_origin(origin)?;
 
             // Ensure such an assetId does not exist
             ensure!(
-                !AssetIdToLocation::<T, I>::contains_key(&asset_id),
-                Error::<T, I>::AssetAlreadyRegistered
+                !AssetIdToLocation::<T>::contains_key(&asset_id),
+                Error::<T>::AssetAlreadyRegistered
             );
 
             let v3_asset_loc = MultiLocation::try_from(*asset_location)
-                .map_err(|_| Error::<T, I>::MultiLocationNotSupported)?;
+                .map_err(|_| Error::<T>::MultiLocationNotSupported)?;
             let asset_location = VersionedMultiLocation::V3(v3_asset_loc);
 
-            AssetIdToLocation::<T, I>::insert(&asset_id, asset_location.clone());
-            AssetLocationToId::<T, I>::insert(&asset_location, asset_id);
+            AssetIdToLocation::<T>::insert(&asset_id, asset_location.clone());
+            AssetLocationToId::<T>::insert(&asset_location, asset_id);
 
             Self::deposit_event(Event::AssetRegistered {
                 asset_location,
@@ -243,15 +243,15 @@ pub mod pallet {
             T::ManagerOrigin::ensure_origin(origin)?;
 
             let v3_asset_loc = MultiLocation::try_from(*asset_location)
-                .map_err(|_| Error::<T, I>::MultiLocationNotSupported)?;
+                .map_err(|_| Error::<T>::MultiLocationNotSupported)?;
             let asset_location = VersionedMultiLocation::V3(v3_asset_loc);
 
             ensure!(
-                AssetLocationToId::<T, I>::contains_key(&asset_location),
-                Error::<T, I>::AssetDoesNotExist
+                AssetLocationToId::<T>::contains_key(&asset_location),
+                Error::<T>::AssetDoesNotExist
             );
 
-            AssetLocationUnitsPerSecond::<T, I>::insert(&asset_location, units_per_second);
+            AssetLocationUnitsPerSecond::<T>::insert(&asset_location, units_per_second);
 
             Self::deposit_event(Event::UnitsPerSecondChanged {
                 asset_location,
@@ -267,28 +267,27 @@ pub mod pallet {
         pub fn change_existing_asset_location(
             origin: OriginFor<T>,
             new_asset_location: Box<VersionedMultiLocation>,
-            asset_id: T::AssetId,
+            #[pallet::compact] asset_id: T::AssetId,
         ) -> DispatchResult {
             T::ManagerOrigin::ensure_origin(origin)?;
 
             let v3_asset_loc = MultiLocation::try_from(*new_asset_location)
-                .map_err(|_| Error::<T, I>::MultiLocationNotSupported)?;
+                .map_err(|_| Error::<T>::MultiLocationNotSupported)?;
             let new_asset_location = VersionedMultiLocation::V3(v3_asset_loc);
 
-            let previous_asset_location = AssetIdToLocation::<T, I>::get(&asset_id)
-                .ok_or(Error::<T, I>::AssetDoesNotExist)?;
+            let previous_asset_location =
+                AssetIdToLocation::<T>::get(&asset_id).ok_or(Error::<T>::AssetDoesNotExist)?;
 
             // Insert new asset type info
-            AssetIdToLocation::<T, I>::insert(&asset_id, new_asset_location.clone());
-            AssetLocationToId::<T, I>::insert(&new_asset_location, asset_id);
+            AssetIdToLocation::<T>::insert(&asset_id, new_asset_location.clone());
+            AssetLocationToId::<T>::insert(&new_asset_location, asset_id);
 
             // Remove previous asset type info
-            AssetLocationToId::<T, I>::remove(&previous_asset_location);
+            AssetLocationToId::<T>::remove(&previous_asset_location);
 
             // Change AssetLocationUnitsPerSecond
-            if let Some(units) = AssetLocationUnitsPerSecond::<T, I>::take(&previous_asset_location)
-            {
-                AssetLocationUnitsPerSecond::<T, I>::insert(&new_asset_location, units);
+            if let Some(units) = AssetLocationUnitsPerSecond::<T>::take(&previous_asset_location) {
+                AssetLocationUnitsPerSecond::<T>::insert(&new_asset_location, units);
             }
 
             Self::deposit_event(Event::AssetLocationChanged {
@@ -311,10 +310,10 @@ pub mod pallet {
             T::ManagerOrigin::ensure_origin(origin)?;
 
             let v3_asset_loc = MultiLocation::try_from(*asset_location)
-                .map_err(|_| Error::<T, I>::MultiLocationNotSupported)?;
+                .map_err(|_| Error::<T>::MultiLocationNotSupported)?;
             let asset_location = VersionedMultiLocation::V3(v3_asset_loc);
 
-            AssetLocationUnitsPerSecond::<T, I>::remove(&asset_location);
+            AssetLocationUnitsPerSecond::<T>::remove(&asset_location);
 
             Self::deposit_event(Event::SupportedAssetRemoved { asset_location });
             Ok(())
@@ -323,15 +322,18 @@ pub mod pallet {
         /// Removes all information related to asset, removing it from XCM support.
         #[pallet::call_index(4)]
         #[pallet::weight(T::WeightInfo::remove_asset())]
-        pub fn remove_asset(origin: OriginFor<T>, asset_id: T::AssetId) -> DispatchResult {
+        pub fn remove_asset(
+            origin: OriginFor<T>,
+            #[pallet::compact] asset_id: T::AssetId,
+        ) -> DispatchResult {
             T::ManagerOrigin::ensure_origin(origin)?;
 
-            let asset_location = AssetIdToLocation::<T, I>::get(&asset_id)
-                .ok_or(Error::<T, I>::AssetDoesNotExist)?;
+            let asset_location =
+                AssetIdToLocation::<T>::get(&asset_id).ok_or(Error::<T>::AssetDoesNotExist)?;
 
-            AssetIdToLocation::<T, I>::remove(&asset_id);
-            AssetLocationToId::<T, I>::remove(&asset_location);
-            AssetLocationUnitsPerSecond::<T, I>::remove(&asset_location);
+            AssetIdToLocation::<T>::remove(&asset_id);
+            AssetLocationToId::<T>::remove(&asset_location);
+            AssetLocationUnitsPerSecond::<T>::remove(&asset_location);
 
             Self::deposit_event(Event::AssetRemoved {
                 asset_id,

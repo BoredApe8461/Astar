@@ -248,12 +248,6 @@ impl Contains<RuntimeCall> for BaseFilter {
                 // registering the asset location should be good enough for users, any change can be handled via issue ticket or help request
                 _ => false,
             },
-            // Filter cross-chain nfts config, only allow registration for non-root users
-            RuntimeCall::XcUniquesConfig(method) => match method {
-                pallet_xc_asset_config::Call::register_asset_location { .. } => true,
-                // registering the asset location should be good enough for users, any change can be handled via issue ticket or help request
-                _ => false,
-            },
             // These modules are not allowed to be called by transactions:
             // Other modules should works:
             _ => true,
@@ -1135,7 +1129,6 @@ impl InstanceFilter<RuntimeCall> for ProxyType {
                         | RuntimeCall::CumulusXcm(..)
                         | RuntimeCall::DmpQueue(..)
                         | RuntimeCall::XcAssetConfig(..)
-                        | RuntimeCall::XcUniquesConfig(..)
                         // Skip entire EVM pallet
                         // Skip entire Ethereum pallet
                         | RuntimeCall::DynamicEvmBaseFee(..)
@@ -1221,17 +1214,9 @@ impl pallet_proxy::Config for Runtime {
     type AnnouncementDepositFactor = AnnouncementDepositFactor;
 }
 
-impl pallet_xc_asset_config::Config<pallet_xc_asset_config::Instance1> for Runtime {
+impl pallet_xc_asset_config::Config for Runtime {
     type RuntimeEvent = RuntimeEvent;
     type AssetId = AssetId;
-    // Good enough for testnet since we lack pallet-assets hooks for now
-    type ManagerOrigin = EnsureRoot<AccountId>;
-    type WeightInfo = pallet_xc_asset_config::weights::SubstrateWeight<Self>;
-}
-
-impl pallet_xc_asset_config::Config<pallet_xc_asset_config::Instance2> for Runtime {
-    type RuntimeEvent = RuntimeEvent;
-    type AssetId = (CollectionId, ItemId);
     // Good enough for testnet since we lack pallet-assets hooks for now
     type ManagerOrigin = EnsureRoot<AccountId>;
     type WeightInfo = pallet_xc_asset_config::weights::SubstrateWeight<Self>;
@@ -1316,9 +1301,8 @@ construct_runtime!(
         PolkadotXcm: pallet_xcm = 51,
         CumulusXcm: cumulus_pallet_xcm = 52,
         DmpQueue: cumulus_pallet_dmp_queue = 53,
-        XcAssetConfig: pallet_xc_asset_config::<Instance1> = 54,
+        XcAssetConfig: pallet_xc_asset_config = 54,
         XTokens: orml_xtokens = 55,
-        XcUniquesConfig: pallet_xc_asset_config::<Instance2> = 56,
 
         EVM: pallet_evm = 60,
         Ethereum: pallet_ethereum = 61,
@@ -1492,7 +1476,6 @@ mod benches {
         [pallet_dapps_staking, DappsStaking]
         [block_rewards_hybrid, BlockReward]
         [pallet_xc_asset_config, XcAssetConfig]
-        [pallet_xc_asset_config, XcUniquesConfig]
         [pallet_collator_selection, CollatorSelection]
         [pallet_xcm, PolkadotXcm]
         [pallet_ethereum_checked, EthereumChecked]

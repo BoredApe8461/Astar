@@ -123,7 +123,7 @@ impl MatchesNonFungibles<CollectionId, ItemId> for MultiAssetToUniquesConverter 
 
         let item_id = match instance {
             Index(indx) => *indx,
-            _ => todo!(),
+            _ => return Err(MatchError::AssetNotHandled),
         };
 
         Ok((collection_id, item_id))

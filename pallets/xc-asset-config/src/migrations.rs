@@ -22,23 +22,23 @@ use frame_support::{dispatch::GetStorageVersion, log, pallet_prelude::*, traits:
 use sp_std::{marker::PhantomData, vec::Vec};
 use xcm::IntoVersion;
 
-pub struct MigrationXcmV3<T: Config<I>, I: 'static>(PhantomData<(T, I)>);
-impl<T: Config<I>, I: 'static> OnRuntimeUpgrade for MigrationXcmV3<T, I> {
+pub struct MigrationXcmV3<T: Config>(PhantomData<T>);
+impl<T: Config> OnRuntimeUpgrade for MigrationXcmV3<T> {
     fn on_runtime_upgrade() -> Weight {
-        let version = Pallet::<T, I>::on_chain_storage_version();
+        let version = Pallet::<T>::on_chain_storage_version();
         let mut consumed_weight = Weight::zero();
         if version >= 2 {
             return consumed_weight;
         }
 
         // 1st map //
-        let id_to_location_entries: Vec<_> = AssetIdToLocation::<T, I>::iter().collect();
+        let id_to_location_entries: Vec<_> = AssetIdToLocation::<T>::iter().collect();
 
         for (asset_id, legacy_location) in id_to_location_entries {
             consumed_weight.saturating_accrue(T::DbWeight::get().reads_writes(1, 1));
 
             if let Ok(new_location) = legacy_location.into_version(3) {
-                AssetIdToLocation::<T, I>::insert(asset_id, new_location);
+                AssetIdToLocation::<T>::insert(asset_id, new_location);
             } else {
                 // Won't happen, can be verified with try-runtime before upgrade
                 log::warn!(
@@ -49,13 +49,13 @@ impl<T: Config<I>, I: 'static> OnRuntimeUpgrade for MigrationXcmV3<T, I> {
         }
 
         // 2nd map //
-        let location_to_id_entries: Vec<_> = AssetLocationToId::<T, I>::drain().collect();
+        let location_to_id_entries: Vec<_> = AssetLocationToId::<T>::drain().collect();
 
         for (legacy_location, asset_id) in location_to_id_entries {
             consumed_weight.saturating_accrue(T::DbWeight::get().reads_writes(1, 2));
 
             if let Ok(new_location) = legacy_location.into_version(3) {
-                AssetLocationToId::<T, I>::insert(new_location, asset_id);
+                AssetLocationToId::<T>::insert(new_location, asset_id);
             } else {
                 // Shouldn't happen, can be verified with try-runtime before upgrade
                 log::warn!(
@@ -66,21 +66,20 @@ impl<T: Config<I>, I: 'static> OnRuntimeUpgrade for MigrationXcmV3<T, I> {
         }
 
         // 3rd map //
-        let location_to_price_entries: Vec<_> =
-            AssetLocationUnitsPerSecond::<T, I>::drain().collect();
+        let location_to_price_entries: Vec<_> = AssetLocationUnitsPerSecond::<T>::drain().collect();
 
         for (legacy_location, price) in location_to_price_entries {
             consumed_weight.saturating_accrue(T::DbWeight::get().reads_writes(1, 2));
 
             if let Ok(new_location) = legacy_location.into_version(3) {
-                AssetLocationUnitsPerSecond::<T, I>::insert(new_location, price);
+                AssetLocationUnitsPerSecond::<T>::insert(new_location, price);
             } else {
                 // Shouldn't happen, can be verified with try-runtime before upgrade
                 log::warn!("Failed to convert AssetLocationUnitsPerSecond value!");
             }
         }
 
-        StorageVersion::new(2).put::<Pallet<T, I>>();
+        StorageVersion::new(2).put::<Pallet<T>>();
         consumed_weight.saturating_accrue(T::DbWeight::get().reads(1));
 
         consumed_weight
@@ -88,34 +87,34 @@ impl<T: Config<I>, I: 'static> OnRuntimeUpgrade for MigrationXcmV3<T, I> {
 
     #[cfg(feature = "try-runtime")]
     fn pre_upgrade() -> Result<Vec<u8>, sp_runtime::TryRuntimeError> {
-        assert!(Pallet::<T, I>::on_chain_storage_version() < 2);
-        let id_to_location_entries: Vec<_> = AssetIdToLocation::<T, I>::iter().collect();
+        assert!(Pallet::<T>::on_chain_storage_version() < 2);
+        let id_to_location_entries: Vec<_> = AssetIdToLocation::<T>::iter().collect();
 
         Ok(id_to_location_entries.encode())
     }
 
     #[cfg(feature = "try-runtime")]
     fn post_upgrade(state: Vec<u8>) -> Result<(), sp_runtime::TryRuntimeError> {
-        assert_eq!(Pallet::<T, I>::on_chain_storage_version(), 2);
+        assert_eq!(Pallet::<T>::on_chain_storage_version(), 2);
 
         use xcm::VersionedMultiLocation;
         let legacy_id_to_location_entries: Vec<(T::AssetId, VersionedMultiLocation)> =
             Decode::decode(&mut state.as_ref())
                 .map_err(|_| "Cannot decode data from pre_upgrade")?;
 
-        let new_id_to_location_entries: Vec<_> = AssetIdToLocation::<T, I>::iter().collect();
+        let new_id_to_location_entries: Vec<_> = AssetIdToLocation::<T>::iter().collect();
         assert_eq!(
             legacy_id_to_location_entries.len(),
             new_id_to_location_entries.len()
         );
 
         for (ref id, ref _legacy_location) in legacy_id_to_location_entries {
-            let new_location = AssetIdToLocation::<T, I>::get(id);
+            let new_location = AssetIdToLocation::<T>::get(id);
             assert!(new_location.is_some());
             let new_location = new_location.expect("Assert above ensures it's `Some`.");
 
-            assert_eq!(AssetLocationToId::<T, I>::get(&new_location), Some(*id));
-            assert!(AssetLocationUnitsPerSecond::<T, I>::contains_key(
+            assert_eq!(AssetLocationToId::<T>::get(&new_location), Some(*id));
+            assert!(AssetLocationUnitsPerSecond::<T>::contains_key(
                 &new_location
             ));
         }
