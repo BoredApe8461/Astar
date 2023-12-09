@@ -6029,6 +6029,7 @@ dependencies = [
  "pallet-chain-extension-assets",
  "pallet-chain-extension-dapps-staking",
  "pallet-chain-extension-unified-accounts",
+ "pallet-chain-extension-uniques",
  "pallet-chain-extension-xvm",
  "pallet-collective",
  "pallet-contracts",
@@ -6062,6 +6063,7 @@ dependencies = [
  "pallet-transaction-payment-rpc-runtime-api",
  "pallet-treasury",
  "pallet-unified-accounts",
+ "pallet-uniques",
  "pallet-utility",
  "pallet-vesting",
  "pallet-xvm",
@@ -6825,17 +6827,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "nfts-chain-extension-types"
-version = "0.1.0"
-dependencies = [
- "frame-system",
- "pallet-contracts",
- "parity-scale-codec",
- "scale-info",
- "sp-runtime",
-]
-
-[[package]]
 name = "nix"
 version = "0.24.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -7527,25 +7518,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "pallet-chain-extension-nfts"
-version = "0.1.0"
-dependencies = [
- "frame-support",
- "frame-system",
- "log",
- "nfts-chain-extension-types",
- "num-traits",
- "pallet-contracts",
- "pallet-contracts-primitives",
- "pallet-uniques",
- "parity-scale-codec",
- "scale-info",
- "sp-core",
- "sp-runtime",
- "sp-std",
-]
-
-[[package]]
 name = "pallet-chain-extension-unified-accounts"
 version = "0.1.0"
 dependencies = [
@@ -7564,6 +7536,25 @@ dependencies = [
  "sp-runtime",
  "sp-std",
  "unified-accounts-chain-extension-types",
+]
+
+[[package]]
+name = "pallet-chain-extension-uniques"
+version = "0.1.0"
+dependencies = [
+ "frame-support",
+ "frame-system",
+ "log",
+ "num-traits",
+ "pallet-contracts",
+ "pallet-contracts-primitives",
+ "pallet-uniques",
+ "parity-scale-codec",
+ "scale-info",
+ "sp-core",
+ "sp-runtime",
+ "sp-std",
+ "uniques-chain-extension-types",
 ]
 
 [[package]]
@@ -13185,6 +13176,7 @@ dependencies = [
  "pallet-chain-extension-assets",
  "pallet-chain-extension-dapps-staking",
  "pallet-chain-extension-unified-accounts",
+ "pallet-chain-extension-uniques",
  "pallet-chain-extension-xvm",
  "pallet-collator-selection",
  "pallet-collective",
@@ -13223,6 +13215,7 @@ dependencies = [
  "pallet-transaction-payment-rpc-runtime-api",
  "pallet-treasury",
  "pallet-unified-accounts",
+ "pallet-uniques",
  "pallet-utility",
  "pallet-vesting",
  "pallet-xc-asset-config",
@@ -15382,6 +15375,17 @@ dependencies = [
  "parity-scale-codec",
  "scale-info",
  "sp-core",
+ "sp-runtime",
+]
+
+[[package]]
+name = "uniques-chain-extension-types"
+version = "0.1.0"
+dependencies = [
+ "frame-system",
+ "pallet-contracts",
+ "parity-scale-codec",
+ "scale-info",
  "sp-runtime",
 ]
 
