@@ -6030,6 +6030,7 @@ dependencies = [
  "pallet-block-rewards-hybrid",
  "pallet-chain-extension-assets",
  "pallet-chain-extension-unified-accounts",
+ "pallet-chain-extension-uniques",
  "pallet-chain-extension-xvm",
  "pallet-collective",
  "pallet-contracts",
@@ -7504,6 +7505,25 @@ dependencies = [
  "sp-runtime",
  "sp-std",
  "unified-accounts-chain-extension-types",
+]
+
+[[package]]
+name = "pallet-chain-extension-uniques"
+version = "0.1.0"
+dependencies = [
+ "frame-support",
+ "frame-system",
+ "log",
+ "num-traits",
+ "pallet-contracts",
+ "pallet-contracts-primitives",
+ "pallet-uniques",
+ "parity-scale-codec",
+ "scale-info",
+ "sp-core",
+ "sp-runtime",
+ "sp-std",
+ "uniques-chain-extension-types",
 ]
 
 [[package]]
@@ -13188,6 +13208,7 @@ dependencies = [
  "pallet-balances",
  "pallet-chain-extension-assets",
  "pallet-chain-extension-unified-accounts",
+ "pallet-chain-extension-uniques",
  "pallet-chain-extension-xvm",
  "pallet-collator-selection",
  "pallet-collective",
@@ -15395,6 +15416,16 @@ dependencies = [
  "scale-info",
  "sp-core",
  "sp-runtime",
+]
+
+[[package]]
+name = "uniques-chain-extension-types"
+version = "0.1.0"
+dependencies = [
+ "frame-system",
+ "pallet-contracts",
+ "parity-scale-codec",
+ "scale-info",
 ]
 
 [[package]]

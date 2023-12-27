@@ -130,6 +130,7 @@ moonbeam-rpc-primitives-txpool = { workspace = true, optional = true }
 
 # chain-extensions
 pallet-chain-extension-assets = { workspace = true }
+pallet-chain-extension-uniques = { workspace = true }
 
 # benchmarking
 array-bytes = { workspace = true }
@@ -242,6 +243,7 @@ std = [
 	"xcm-executor/std",
 	"substrate-wasm-builder",
 	"pallet-chain-extension-assets/std",
+	"pallet-chain-extension-uniques/std",
 	"orml-xtokens/std",
 	"orml-xcm-support/std",
 	"astar-primitives/std",
