@@ -56,7 +56,7 @@ impl<T: frame_system::Config> WeightInfo for SubstrateWeight<T> {
     }
 
     fn can_transfer() -> Weight {
-        T::DbWeight::get().reads(1 as u64)
+        T::DbWeight::get().reads(2 as u64)
     }
 
     fn collections(n: u32) -> Weight {
