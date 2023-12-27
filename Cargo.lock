@@ -7507,6 +7507,25 @@ dependencies = [
 ]
 
 [[package]]
+name = "pallet-chain-extension-uniques"
+version = "0.1.0"
+dependencies = [
+ "frame-support",
+ "frame-system",
+ "log",
+ "num-traits",
+ "pallet-contracts",
+ "pallet-contracts-primitives",
+ "pallet-uniques",
+ "parity-scale-codec",
+ "scale-info",
+ "sp-core",
+ "sp-runtime",
+ "sp-std",
+ "uniques-chain-extension-types",
+]
+
+[[package]]
 name = "pallet-chain-extension-xvm"
 version = "0.1.1"
 dependencies = [
@@ -15395,6 +15414,16 @@ dependencies = [
  "scale-info",
  "sp-core",
  "sp-runtime",
+]
+
+[[package]]
+name = "uniques-chain-extension-types"
+version = "0.1.0"
+dependencies = [
+ "frame-system",
+ "pallet-contracts",
+ "parity-scale-codec",
+ "scale-info",
 ]
 
 [[package]]
