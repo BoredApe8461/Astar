@@ -148,6 +148,9 @@ pub const MINUTES: BlockNumber = 60_000 / (MILLISECS_PER_BLOCK as BlockNumber);
 pub const HOURS: BlockNumber = MINUTES * 60;
 pub const DAYS: BlockNumber = HOURS * 24;
 
+pub type CollectionId = u128;
+pub type ItemId = u128;
+
 impl AddressToAssetId<AssetId> for Runtime {
     fn address_to_asset_id(address: H160) -> Option<AssetId> {
         let mut data = [0u8; 16];
@@ -1019,9 +1022,9 @@ impl InstanceFilter<RuntimeCall> for ProxyType {
             ProxyType::Balances => {
                 matches!(c, RuntimeCall::Balances(..))
             }
-            // All Runtime calls from Pallet Assets allowed for proxy account
+            // All Runtime calls from Pallet Assets and Uniques allowed for proxy account
             ProxyType::Assets => {
-                matches!(c, RuntimeCall::Assets(..))
+                matches!(c, RuntimeCall::Assets(..) | RuntimeCall::Uniques(..))
             }
             ProxyType::Governance => {
                 matches!(
@@ -1083,6 +1086,35 @@ impl pallet_proxy::Config for Runtime {
     type AnnouncementDepositFactor = ConstU128<{ MILLIAST * 660 }>;
 }
 
+parameter_types! {
+    pub const UniquesCollectionDeposit: Balance = 10 * AST;
+    pub const UniquesItemDeposit: Balance = 1 * AST;
+    pub const UniquesMetadataDepositBase: Balance = deposit(1, 129);
+    pub const UniquesAttributeDepositBase: Balance = deposit(1, 0);
+    pub const UniquesDepositPerByte: Balance = deposit(0, 1);
+}
+
+impl pallet_uniques::Config for Runtime {
+    type RuntimeEvent = RuntimeEvent;
+    type CollectionId = CollectionId;
+    type ItemId = ItemId;
+    type Currency = Balances;
+    type ForceOrigin = EnsureRoot<AccountId>;
+    type CollectionDeposit = UniquesCollectionDeposit;
+    type ItemDeposit = UniquesItemDeposit;
+    type MetadataDepositBase = UniquesMetadataDepositBase;
+    type AttributeDepositBase = UniquesAttributeDepositBase;
+    type DepositPerByte = UniquesDepositPerByte;
+    type StringLimit = ConstU32<128>;
+    type KeyLimit = ConstU32<32>;
+    type ValueLimit = ConstU32<64>;
+    type WeightInfo = weights::pallet_uniques::WeightInfo<Runtime>;
+    #[cfg(feature = "runtime-benchmarks")]
+    type Helper = ();
+    type CreateOrigin = AsEnsureOriginWithArg<EnsureSigned<AccountId>>;
+    type Locker = ();
+}
+
 // TODO: remove this once https://github.com/paritytech/substrate/issues/12161 is resolved
 #[rustfmt::skip]
 construct_runtime!(
@@ -1122,6 +1154,7 @@ construct_runtime!(
         Preimage: pallet_preimage,
         EthereumChecked: pallet_ethereum_checked,
         UnifiedAccounts: pallet_unified_accounts,
+        Uniques: pallet_uniques,
     }
 );
 
@@ -1243,6 +1276,7 @@ mod benches {
         [pallet_dapp_staking_migration, DappStakingMigration]
         [pallet_inflation, Inflation]
         [pallet_dynamic_evm_base_fee, DynamicEvmBaseFee]
+        [pallet_uniques, Uniques]
     );
 }
 
