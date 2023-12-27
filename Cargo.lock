@@ -6030,6 +6030,7 @@ dependencies = [
  "pallet-block-rewards-hybrid",
  "pallet-chain-extension-assets",
  "pallet-chain-extension-unified-accounts",
+ "pallet-chain-extension-uniques",
  "pallet-chain-extension-xvm",
  "pallet-collective",
  "pallet-contracts",
