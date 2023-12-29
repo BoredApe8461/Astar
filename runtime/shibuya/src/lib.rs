@@ -131,7 +131,7 @@ pub const MINUTES: BlockNumber = 60_000 / (MILLISECS_PER_BLOCK as BlockNumber);
 pub const HOURS: BlockNumber = MINUTES * 60;
 pub const DAYS: BlockNumber = HOURS * 24;
 
-pub type CollectionId = u128;
+pub type CollectionId = u32;
 pub type ItemId = u128;
 
 impl AddressToAssetId<AssetId> for Runtime {
