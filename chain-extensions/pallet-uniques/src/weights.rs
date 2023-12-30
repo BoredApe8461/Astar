@@ -30,6 +30,8 @@ pub trait WeightInfo {
     fn attribute() -> Weight;
     fn collection_attribute() -> Weight;
     fn can_transfer() -> Weight;
+    fn collection() -> Weight;
+    fn item() -> Weight;
     fn collections(n: u32) -> Weight;
     fn items(n: u32) -> Weight;
     fn owned(n: u32) -> Weight;
@@ -57,6 +59,14 @@ impl<T: frame_system::Config> WeightInfo for SubstrateWeight<T> {
 
     fn can_transfer() -> Weight {
         T::DbWeight::get().reads(2 as u64)
+    }
+
+    fn collection() -> Weight {
+        T::DbWeight::get().reads(1 as u64)
+    }
+
+    fn item() -> Weight {
+        T::DbWeight::get().reads(1 as u64)
     }
 
     fn collections(n: u32) -> Weight {
