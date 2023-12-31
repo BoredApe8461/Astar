@@ -28,7 +28,8 @@ use frame_support::{
     construct_runtime, parameter_types,
     traits::{
         AsEnsureOriginWithArg, ConstU128, ConstU32, ConstU64, Currency, EitherOfDiverse,
-        EqualPrivilegeOnly, FindAuthor, Get, InstanceFilter, Nothing, OnFinalize, WithdrawReasons,
+        EqualPrivilegeOnly, Everything, FindAuthor, Get, InstanceFilter, OnFinalize,
+        WithdrawReasons,
     },
     weights::{
         constants::{ExtrinsicBaseWeight, RocksDbWeight, WEIGHT_REF_TIME_PER_SECOND},
@@ -918,7 +919,7 @@ impl pallet_contracts::Config for Runtime {
     /// and make sure they are stable. Dispatchables exposed to contracts are not allowed to
     /// change because that would break already deployed contracts. The `Call` structure itself
     /// is not allowed to change the indices of existing pallets, too.
-    type CallFilter = Nothing;
+    type CallFilter = Everything;
     type DepositPerItem = DepositPerItem;
     type DepositPerByte = DepositPerByte;
     type DefaultDepositLimit = DefaultDepositLimit;
