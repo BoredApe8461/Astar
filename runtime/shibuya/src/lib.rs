@@ -720,6 +720,10 @@ impl pallet_contracts::Config for Runtime {
         AssetsExtension<Self, pallet_chain_extension_assets::weights::SubstrateWeight<Self>>,
         UnifiedAccountsExtension<Self, UnifiedAccounts>,
         UniquesExtension<Self, pallet_chain_extension_uniques::weights::SubstrateWeight<Self>>,
+        BlockNumberProviderExtension<
+            Self,
+            chain_extension_block_number_provider::weights::SubstrateWeight<Self>,
+        >,
     );
     type Schedule = Schedule;
     type AddressGenerator = pallet_contracts::DefaultAddressGenerator;
