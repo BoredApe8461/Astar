@@ -195,6 +195,7 @@ match_types! {
 
 pub type XcmBarrier = (
     TakeWeightCredit,
+    AllowUnpaidExecutionFrom<Everything>,
     AllowTopLevelPaidExecutionFrom<Everything>,
     // This will first calculate the derived origin, before checking it against the barrier implementation
     WithComputedOrigin<AllowTopLevelPaidExecutionFrom<Everything>, UniversalLocation, ConstU32<8>>,
@@ -222,7 +223,7 @@ impl xcm_executor::Config for XcmConfig {
     type XcmSender = XcmRouter;
     type AssetTransactor = AssetTransactors;
     type OriginConverter = XcmOriginToTransactDispatchOrigin;
-    type IsReserve = ReserveAssetFilter;
+    type IsReserve = Everything;
     type IsTeleporter = ();
     type UniversalLocation = UniversalLocation;
     type Barrier = XcmBarrier;
