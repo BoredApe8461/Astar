@@ -1160,7 +1160,7 @@ construct_runtime!(
         Preimage: pallet_preimage,
         EthereumChecked: pallet_ethereum_checked,
         UnifiedAccounts: pallet_unified_accounts,
-        Uniques: pallet_uniques,
+        Uniques: pallet_uniques = 37,
     }
 );
 
