@@ -97,7 +97,7 @@ moonbeam-rpc-primitives-txpool = { workspace = true, optional = true }
 # chain-extensions
 pallet-chain-extension-assets = { workspace = true }
 pallet-chain-extension-uniques = { workspace = true }
-chain-extension-block-number-provider = { workspace = true, features = ["local"]}
+
 
 # benchmarking
 array-bytes = { workspace = true }
@@ -187,7 +187,6 @@ std = [
 	"substrate-wasm-builder",
 	"pallet-chain-extension-assets/std",
 	"pallet-chain-extension-uniques/std",
-	"chain-extension-block-number-provider/std",
 	"astar-primitives/std",
 ]
 runtime-benchmarks = [

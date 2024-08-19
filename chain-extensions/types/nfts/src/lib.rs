@@ -1,16 +1,13 @@
 #![cfg_attr(not(feature = "std"), no_std)]
-
 use parity_scale_codec::MaxEncodedLen;
 use parity_scale_codec::{Decode, Encode};
 use sp_runtime::{traits::Printable, DispatchError, DispatchErrorWithPostInfo, ModuleError};
-
 
 #[derive(PartialEq, Eq, Copy, Clone, Encode, Decode, Debug)]
 #[cfg_attr(feature = "std", derive(scale_info::TypeInfo))]
 pub enum Outcome {
     /// Success
     Success = 0,
-
     /// The signing account has no permission to do the operation.
     NoPermission = 1,
     /// The given item ID is unknown.
@@ -52,7 +49,6 @@ pub enum Outcome {
     /// Unknown error
     RuntimeError = 99,
 }
-
 
 impl From<DispatchError> for Outcome {
     fn from(input: DispatchError) -> Self {

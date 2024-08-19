@@ -1,8 +1,7 @@
 [package]
-name = "pallet-chain-extension-uniques"
+name = "pallet-chain-extension-nfts"
 version = "0.1.0"
 license = "Apache-2.0"
-
 description = "Assets chain extension for WASM contracts"
 authors.workspace = true
 edition.workspace = true
@@ -10,7 +9,7 @@ homepage.workspace = true
 repository.workspace = true
 
 [dependencies]
-uniques-chain-extension-types = { workspace = true }
+nfts-chain-extension-types = { workspace = true }
 frame-support = { workspace = true }
 frame-system = { workspace = true }
 log = { workspace = true }
@@ -38,5 +37,5 @@ std = [
 	"sp-core/std",
 	"sp-runtime/std",
 	"pallet-uniques/std",
-	"uniques-chain-extension-types/std",
+	"nfts-chain-extension-types/std",
 ]

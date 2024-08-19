@@ -16,10 +16,10 @@ members = [
 	"primitives",
 
 	"chain-extensions/pallet-assets",
+	"chain-extensions/pallet-uniques",
 	"chain-extensions/xvm",
 	"chain-extensions/unified-accounts",
 	"chain-extensions/pallet-uniques",
-	"chain-extensions/block-number-provider",
 	"chain-extensions/types/*",
 
 	"vendor/evm-tracing",
@@ -404,6 +404,7 @@ frame-benchmarking-cli = { git = "https://github.com/paritytech/substrate", bran
 # Substrate pallets
 # (wasm)
 pallet-assets = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.43", default-features = false }
+pallet-uniques = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.43", default-features = false }
 pallet-balances = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.43", default-features = false }
 pallet-proxy = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.43", default-features = false }
 pallet-uniques = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.43", default-features = false }
@@ -555,12 +556,13 @@ pallet-evm-precompile-unified-accounts = { path = "./precompiles/unified-account
 
 pallet-chain-extension-xvm = { path = "./chain-extensions/xvm", default-features = false }
 pallet-chain-extension-assets = { path = "./chain-extensions/pallet-assets", default-features = false }
+pallet-chain-extension-uniques = { path = "./chain-extensions/pallet-uniques", default-features = false }
 pallet-chain-extension-unified-accounts = { path = "./chain-extensions/unified-accounts", default-features = false }
 pallet-chain-extension-uniques = { path = "./chain-extensions/pallet-uniques", default-features = false }
-chain-extension-block-number-provider = { path = "./chain-extensions/block-number-provider", default-features = false }
 
 xvm-chain-extension-types = { path = "./chain-extensions/types/xvm", default-features = false }
 assets-chain-extension-types = { path = "./chain-extensions/types/assets", default-features = false }
+uniques-chain-extension-types = { path = "./chain-extensions/types/uniques", default-features = false }
 unified-accounts-chain-extension-types = { path = "./chain-extensions/types/unified-accounts", default-features = false }
 uniques-chain-extension-types = { path = "./chain-extensions/types/uniques", default-features = false }
 

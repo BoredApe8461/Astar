@@ -104,6 +104,11 @@ pub type Precompiles = ShibuyaPrecompiles<Runtime, ShibuyaAssetLocationIdConvert
 
 use chain_extensions::*;
 
+pub type AssetsForceOrigin = EnsureRoot<AccountId>;
+
+pub type CollectionId = u128;
+pub type ItemId = u128;
+
 /// Constant values used within the runtime.
 pub const MICROSBY: Balance = 1_000_000_000_000;
 pub const MILLISBY: Balance = 1_000 * MICROSBY;
@@ -720,10 +725,6 @@ impl pallet_contracts::Config for Runtime {
         AssetsExtension<Self, pallet_chain_extension_assets::weights::SubstrateWeight<Self>>,
         UnifiedAccountsExtension<Self, UnifiedAccounts>,
         UniquesExtension<Self, pallet_chain_extension_uniques::weights::SubstrateWeight<Self>>,
-        BlockNumberProviderExtension<
-            Self,
-            chain_extension_block_number_provider::weights::SubstrateWeight<Self>,
-        >,
     );
     type Schedule = Schedule;
     type AddressGenerator = pallet_contracts::DefaultAddressGenerator;
@@ -1194,6 +1195,7 @@ impl InstanceFilter<RuntimeCall> for ProxyType {
             }
             // All Runtime calls from Pallet Assets and Uniques allowed for proxy account
             ProxyType::Assets => {
+                matches!(c, RuntimeCall::Assets(..) | RuntimeCall::Uniques(..))
                 matches!(c, RuntimeCall::Assets(..) | RuntimeCall::Uniques(..))
             }
             ProxyType::Governance => {
