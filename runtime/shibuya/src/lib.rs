@@ -104,6 +104,11 @@ pub type Precompiles = ShibuyaPrecompiles<Runtime, ShibuyaAssetLocationIdConvert
 
 use chain_extensions::*;
 
+pub type AssetsForceOrigin = EnsureRoot<AccountId>;
+
+pub type CollectionId = u128;
+pub type ItemId = u128;
+
 /// Constant values used within the runtime.
 pub const MICROSBY: Balance = 1_000_000_000_000;
 pub const MILLISBY: Balance = 1_000 * MICROSBY;
@@ -719,6 +724,7 @@ impl pallet_contracts::Config for Runtime {
         XvmExtension<Self, Xvm, UnifiedAccounts>,
         AssetsExtension<Self, pallet_chain_extension_assets::weights::SubstrateWeight<Self>>,
         UnifiedAccountsExtension<Self, UnifiedAccounts>,
+        UniquesExtension<Self, pallet_chain_extension_uniques::weights::SubstrateWeight<Self>>,
     );
     type Schedule = Schedule;
     type AddressGenerator = pallet_contracts::DefaultAddressGenerator;
@@ -1190,6 +1196,7 @@ impl InstanceFilter<RuntimeCall> for ProxyType {
             // All Runtime calls from Pallet Assets and Uniques allowed for proxy account
             ProxyType::Assets => {
                 matches!(c, RuntimeCall::Assets(..) | RuntimeCall::Uniques(..))
+                matches!(c, RuntimeCall::Assets(..) | RuntimeCall::Uniques(..))
             }
             ProxyType::Governance => {
                 matches!(
@@ -1280,35 +1287,6 @@ impl pallet_unified_accounts::Config for Runtime {
     type ChainId = EVMChainId;
     type AccountMappingStorageFee = AccountMappingStorageFee;
     type WeightInfo = pallet_unified_accounts::weights::SubstrateWeight<Self>;
-}
-
-parameter_types! {
-    pub const UniquesCollectionDeposit: Balance = 10 * SBY;
-    pub const UniquesItemDeposit: Balance = 1 * SBY;
-    pub const UniquesMetadataDepositBase: Balance = deposit(1, 129);
-    pub const UniquesAttributeDepositBase: Balance = deposit(1, 0);
-    pub const UniquesDepositPerByte: Balance = deposit(0, 1);
-}
-
-impl pallet_uniques::Config for Runtime {
-    type RuntimeEvent = RuntimeEvent;
-    type CollectionId = CollectionId;
-    type ItemId = ItemId;
-    type Currency = Balances;
-    type ForceOrigin = EnsureRoot<AccountId>;
-    type CollectionDeposit = UniquesCollectionDeposit;
-    type ItemDeposit = UniquesItemDeposit;
-    type MetadataDepositBase = UniquesMetadataDepositBase;
-    type AttributeDepositBase = UniquesAttributeDepositBase;
-    type DepositPerByte = UniquesDepositPerByte;
-    type StringLimit = ConstU32<128>;
-    type KeyLimit = ConstU32<32>;
-    type ValueLimit = ConstU32<64>;
-    type WeightInfo = weights::pallet_uniques::WeightInfo<Runtime>;
-    #[cfg(feature = "runtime-benchmarks")]
-    type Helper = ();
-    type CreateOrigin = AsEnsureOriginWithArg<EnsureSigned<AccountId>>;
-    type Locker = ();
 }
 
 construct_runtime!(
