@@ -6827,6 +6827,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "nfts-chain-extension-types"
+version = "0.1.0"
+dependencies = [
+ "frame-system",
+ "pallet-contracts",
+ "parity-scale-codec",
+ "scale-info",
+ "sp-runtime",
+]
+
+[[package]]
 name = "nix"
 version = "0.24.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -7510,6 +7521,25 @@ dependencies = [
  "pallet-contracts",
  "pallet-contracts-primitives",
  "pallet-dapps-staking",
+ "parity-scale-codec",
+ "scale-info",
+ "sp-core",
+ "sp-runtime",
+ "sp-std",
+]
+
+[[package]]
+name = "pallet-chain-extension-nfts"
+version = "0.1.0"
+dependencies = [
+ "frame-support",
+ "frame-system",
+ "log",
+ "nfts-chain-extension-types",
+ "num-traits",
+ "pallet-contracts",
+ "pallet-contracts-primitives",
+ "pallet-uniques",
  "parity-scale-codec",
  "scale-info",
  "sp-core",
