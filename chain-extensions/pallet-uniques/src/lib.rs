@@ -20,6 +20,7 @@
 
 pub mod weights;
 
+
 use frame_support::traits::nonfungibles::{Inspect, InspectEnumerable};
 use frame_system::RawOrigin;
 use pallet_contracts::chain_extension::{
@@ -32,6 +33,7 @@ use sp_runtime::BoundedVec;
 use sp_runtime::DispatchError;
 use sp_std::marker::PhantomData;
 use sp_std::vec::Vec;
+
 use uniques_chain_extension_types::{select_origin, Origin, Outcome};
 
 type AccountIdLookup<T> = <<T as SysConfig>::Lookup as StaticLookup>::Source;
@@ -791,6 +793,7 @@ where
                 let can_transfer = pallet_uniques::Pallet::<T>::can_transfer(&collection_id, &item);
                 env.write(&can_transfer.encode(), false, None)?;
             }
+
             UniquesFunc::Collections => {
                 let read_bound: u32 = env.read_as()?;
 

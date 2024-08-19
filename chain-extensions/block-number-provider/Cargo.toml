@@ -1,21 +1,19 @@
 [package]
-name = "pallet-chain-extension-uniques"
+name = "chain-extension-block-number-provider"
 version = "0.1.0"
 license = "Apache-2.0"
-
-description = "Assets chain extension for WASM contracts"
+description = "Relay chain block number provider chain extension for WASM contracts"
 authors.workspace = true
 edition.workspace = true
 homepage.workspace = true
 repository.workspace = true
 
 [dependencies]
-uniques-chain-extension-types = { workspace = true }
-frame-support = { workspace = true }
-frame-system = { workspace = true }
+cumulus-pallet-parachain-system ={ workspace = true }
 log = { workspace = true }
 num-traits = { workspace = true }
-pallet-uniques = { workspace = true }
+frame-support = { workspace = true }
+frame-system = { workspace = true }
 pallet-contracts = { workspace = true }
 pallet-contracts-primitives = { workspace = true }
 parity-scale-codec = { workspace = true }
@@ -27,16 +25,16 @@ sp-std = { workspace = true }
 [features]
 default = ["std"]
 std = [
+	"cumulus-pallet-parachain-system/std",
 	"parity-scale-codec/std",
+	"num-traits/std",
 	"frame-support/std",
 	"frame-system/std",
-	"num-traits/std",
 	"pallet-contracts/std",
 	"pallet-contracts-primitives/std",
 	"scale-info/std",
 	"sp-std/std",
 	"sp-core/std",
 	"sp-runtime/std",
-	"pallet-uniques/std",
-	"uniques-chain-extension-types/std",
 ]
+local = []

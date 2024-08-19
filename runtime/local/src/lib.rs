@@ -28,7 +28,8 @@ use frame_support::{
     construct_runtime, parameter_types,
     traits::{
         AsEnsureOriginWithArg, ConstU128, ConstU32, ConstU64, Currency, EitherOfDiverse,
-        EqualPrivilegeOnly, FindAuthor, Get, InstanceFilter, Nothing, OnFinalize, WithdrawReasons,
+        EqualPrivilegeOnly, Everything, FindAuthor, Get, InstanceFilter, OnFinalize,
+        WithdrawReasons,
     },
     weights::{
         constants::{ExtrinsicBaseWeight, RocksDbWeight, WEIGHT_REF_TIME_PER_SECOND},
@@ -153,7 +154,7 @@ pub const MINUTES: BlockNumber = 60_000 / (MILLISECS_PER_BLOCK as BlockNumber);
 pub const HOURS: BlockNumber = MINUTES * 60;
 pub const DAYS: BlockNumber = HOURS * 24;
 
-pub type CollectionId = u128;
+pub type CollectionId = u32;
 pub type ItemId = u128;
 
 impl AddressToAssetId<AssetId> for Runtime {
@@ -923,7 +924,7 @@ impl pallet_contracts::Config for Runtime {
     /// and make sure they are stable. Dispatchables exposed to contracts are not allowed to
     /// change because that would break already deployed contracts. The `Call` structure itself
     /// is not allowed to change the indices of existing pallets, too.
-    type CallFilter = Nothing;
+    type CallFilter = Everything;
     type DepositPerItem = DepositPerItem;
     type DepositPerByte = DepositPerByte;
     type DefaultDepositLimit = DefaultDepositLimit;
@@ -941,7 +942,7 @@ impl pallet_contracts::Config for Runtime {
     type AddressGenerator = pallet_contracts::DefaultAddressGenerator;
     type MaxCodeLen = ConstU32<{ 123 * 1024 }>;
     type MaxStorageKeyLen = ConstU32<128>;
-    type UnsafeUnstableInterface = ConstBool<false>;
+    type UnsafeUnstableInterface = ConstBool<true>;
     type MaxDebugBufferLen = ConstU32<{ 2 * 1024 * 1024 }>;
 }
 
@@ -1160,7 +1161,7 @@ construct_runtime!(
         Preimage: pallet_preimage,
         EthereumChecked: pallet_ethereum_checked,
         UnifiedAccounts: pallet_unified_accounts,
-        Uniques: pallet_uniques,
+        Uniques: pallet_uniques = 37,
     }
 );
 

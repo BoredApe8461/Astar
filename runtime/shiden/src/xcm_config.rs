@@ -38,7 +38,7 @@ use xcm_builder::{
     EnsureXcmOrigin, FixedWeightBounds, FungiblesAdapter, IsConcrete, NoChecking,
     ParentAsSuperuser, ParentIsPreset, RelayChainAsNative, SiblingParachainAsNative,
     SiblingParachainConvertsVia, SignedAccountId32AsNative, SignedToAccountId32,
-    SovereignSignedViaLocation, TakeWeightCredit, UsingComponents, WithComputedOrigin,
+    SovereignSignedViaLocation, TakeWeightCredit, UsingComponents, WithComputedOrigin, SiblingSystemParachainAsSuperuser,
 };
 use xcm_executor::{
     traits::{Convert as XcmConvert, JustTry, WithOriginFilter},
@@ -123,6 +123,7 @@ pub type XcmOriginToTransactDispatchOrigin = (
     // Native converter for Relay-chain (Parent) location; will convert to a `Relay` origin when
     // recognised.
     RelayChainAsNative<RelayChainOrigin, RuntimeOrigin>,
+    SiblingSystemParachainAsSuperuser<cumulus_primitives_core::ParaId, RuntimeOrigin>,
     // Native converter for sibling Parachains; will convert to a `SiblingPara` origin when
     // recognised.
     SiblingParachainAsNative<cumulus_pallet_xcm::Origin, RuntimeOrigin>,
