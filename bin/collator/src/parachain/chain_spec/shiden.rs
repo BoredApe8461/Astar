@@ -22,7 +22,7 @@ use cumulus_primitives_core::ParaId;
 use sc_service::ChainType;
 use shiden_runtime::{
     wasm_binary_unwrap, AccountId, AuraId, Balance, BlockRewardConfig, EVMConfig,
-    ParachainInfoConfig, Precompiles, Signature, SystemConfig, SDN,
+    ParachainInfoConfig, Precompiles, RewardDistributionConfig, Signature, SystemConfig, SDN,
 };
 use sp_core::{sr25519, Pair, Public};
 
@@ -113,8 +113,8 @@ fn make_genesis(
         balances: shiden_runtime::BalancesConfig { balances },
         block_reward: BlockRewardConfig {
             // Make sure sum is 100
-            reward_config: pallet_block_reward::RewardDistributionConfig {
-                base_treasury_percent: Perbill::from_percent(40),
+            reward_config: RewardDistributionConfig {
+                treasury_percent: Perbill::from_percent(40),
                 base_staker_percent: Perbill::from_percent(25),
                 dapps_percent: Perbill::from_percent(25),
                 collators_percent: Perbill::from_percent(10),
@@ -142,7 +142,6 @@ fn make_genesis(
             // We need _some_ code inserted at the precompile address so that
             // the evm will actually call the address.
             accounts: Precompiles::used_addresses()
-                .filter(|addr| !Precompiles::is_blacklisted(addr))
                 .map(|addr| {
                     (
                         addr,

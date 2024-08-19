@@ -22,7 +22,6 @@
 // `construct_runtime!` does a lot of recursion and requires us to increase the limit to 256.
 #![recursion_limit = "256"]
 
-use astar_primitives::evm::HashedDefaultMappings;
 use cumulus_pallet_parachain_system::AnyRelayNumber;
 use frame_support::{
     construct_runtime,
@@ -54,6 +53,7 @@ use pallet_transaction_payment::{
 use parity_scale_codec::{Compact, Decode, Encode, MaxEncodedLen};
 use polkadot_runtime_common::BlockHashCount;
 use sp_api::impl_runtime_apis;
+use sp_arithmetic::fixed_point::FixedU64;
 use sp_core::{ConstBool, OpaqueMetadata, H160, H256, U256};
 use sp_inherents::{CheckInherentsResult, InherentData};
 use sp_runtime::{
@@ -67,12 +67,16 @@ use sp_runtime::{
 };
 use sp_std::prelude::*;
 
-pub use astar_primitives::{
-    ethereum_checked::CheckedEthereumTransact, evm::EvmRevertCodeHandler,
-    xcm::AssetLocationIdConverter, AccountId, Address, AssetId, Balance, BlockNumber, Hash, Header,
-    Index, Signature,
+use astar_primitives::{
+    dapp_staking::{CycleConfiguration, SmartContract},
+    evm::{EvmRevertCodeHandler, HashedDefaultMappings},
+    xcm::AssetLocationIdConverter,
+    Address, AssetId, BlockNumber, Hash, Header, Index,
 };
-pub use pallet_block_rewards_hybrid::RewardDistributionConfig;
+
+pub use astar_primitives::{AccountId, Balance, Signature};
+pub use pallet_dapp_staking_v3::TierThreshold;
+pub use pallet_inflation::InflationParameters;
 
 pub use crate::precompiles::WhitelistedCalls;
 
@@ -95,8 +99,8 @@ mod xcm_config;
 
 pub type ShibuyaAssetLocationIdConverter = AssetLocationIdConverter<AssetId, XcAssetConfig>;
 
-pub use precompiles::{ShibuyaNetworkPrecompiles, ASSET_PRECOMPILE_ADDRESS_PREFIX};
-pub type Precompiles = ShibuyaNetworkPrecompiles<Runtime, ShibuyaAssetLocationIdConverter>;
+pub use precompiles::{ShibuyaPrecompiles, ASSET_PRECOMPILE_ADDRESS_PREFIX};
+pub type Precompiles = ShibuyaPrecompiles<Runtime, ShibuyaAssetLocationIdConverter>;
 
 use chain_extensions::*;
 
@@ -131,6 +135,9 @@ pub const MILLISECS_PER_BLOCK: u64 = 12000;
 pub const MINUTES: BlockNumber = 60_000 / (MILLISECS_PER_BLOCK as BlockNumber);
 pub const HOURS: BlockNumber = MINUTES * 60;
 pub const DAYS: BlockNumber = HOURS * 24;
+
+pub type CollectionId = u128;
+pub type ItemId = u128;
 
 impl AddressToAssetId<AssetId> for Runtime {
     fn address_to_asset_id(address: H160) -> Option<AssetId> {
@@ -172,7 +179,7 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
     spec_name: create_runtime_str!("shibuya"),
     impl_name: create_runtime_str!("shibuya"),
     authoring_version: 1,
-    spec_version: 115,
+    spec_version: 118,
     impl_version: 0,
     apis: RUNTIME_API_VERSIONS,
     transaction_version: 2,
@@ -302,7 +309,7 @@ parameter_types! {
 impl pallet_timestamp::Config for Runtime {
     /// A timestamp: milliseconds since the unix epoch.
     type Moment = u64;
-    type OnTimestampSet = BlockReward;
+    type OnTimestampSet = ();
     type MinimumPeriod = MinimumPeriod;
     type WeightInfo = pallet_timestamp::weights::SubstrateWeight<Runtime>;
 }
@@ -407,29 +414,107 @@ impl pallet_dapps_staking::Config for Runtime {
     type MinimumRemainingAmount = MinimumRemainingAmount;
     type MaxEraStakeValues = MaxEraStakeValues;
     type UnregisteredDappRewardRetention = ConstU32<10>;
+    // Needed so benchmark can use the pallets extrinsics
+    #[cfg(feature = "runtime-benchmarks")]
+    type ForcePalletDisabled = ConstBool<false>;
+    #[cfg(not(feature = "runtime-benchmarks"))]
+    type ForcePalletDisabled = ConstBool<true>;
 }
 
-/// Multi-VM pointer to smart contract instance.
-#[derive(
-    PartialEq, Eq, Copy, Clone, Encode, Decode, RuntimeDebug, MaxEncodedLen, scale_info::TypeInfo,
-)]
-pub enum SmartContract<AccountId> {
-    /// EVM smart contract instance.
-    Evm(sp_core::H160),
-    /// Wasm smart contract instance.
-    Wasm(AccountId),
-}
-
-impl<AccountId> Default for SmartContract<AccountId> {
-    fn default() -> Self {
-        SmartContract::Evm(H160::repeat_byte(0x00))
+// Placeholder until we introduce a pallet for this.
+// Real solution will be an oracle.
+pub struct DummyPriceProvider;
+impl pallet_dapp_staking_v3::PriceProvider for DummyPriceProvider {
+    fn average_price() -> FixedU64 {
+        FixedU64::from_rational(1, 10)
     }
 }
 
-impl<AccountId: From<[u8; 32]>> From<[u8; 32]> for SmartContract<AccountId> {
-    fn from(input: [u8; 32]) -> Self {
-        SmartContract::Wasm(input.into())
+#[cfg(feature = "runtime-benchmarks")]
+pub struct BenchmarkHelper<SC, ACC>(sp_std::marker::PhantomData<(SC, ACC)>);
+#[cfg(feature = "runtime-benchmarks")]
+impl pallet_dapp_staking_v3::BenchmarkHelper<SmartContract<AccountId>, AccountId>
+    for BenchmarkHelper<SmartContract<AccountId>, AccountId>
+{
+    fn get_smart_contract(id: u32) -> SmartContract<AccountId> {
+        let id_bytes = id.to_le_bytes();
+        let mut account = [0u8; 32];
+        account[..id_bytes.len()].copy_from_slice(&id_bytes);
+
+        SmartContract::Wasm(AccountId::from(account))
     }
+
+    fn set_balance(account: &AccountId, amount: Balance) {
+        use frame_support::traits::fungible::Unbalanced as FunUnbalanced;
+        Balances::write_balance(account, amount)
+            .expect("Must succeed in test/benchmark environment.");
+    }
+}
+
+impl pallet_dapp_staking_v3::Config for Runtime {
+    type RuntimeEvent = RuntimeEvent;
+    type RuntimeFreezeReason = RuntimeFreezeReason;
+    type Currency = Balances;
+    type SmartContract = SmartContract<AccountId>;
+    type ManagerOrigin = frame_system::EnsureRoot<AccountId>;
+    type NativePriceProvider = DummyPriceProvider;
+    type StakingRewardHandler = Inflation;
+    type CycleConfiguration = InflationCycleConfig;
+    type EraRewardSpanLength = ConstU32<16>;
+    type RewardRetentionInPeriods = ConstU32<2>; // Low enough value so we can get some expired rewards during testing
+    type MaxNumberOfContracts = ConstU32<500>;
+    type MaxUnlockingChunks = ConstU32<8>;
+    type MinimumLockedAmount = MinimumStakingAmount; // Keep the same as the old pallet
+    type UnlockingPeriod = ConstU32<4>; // Keep it low so it's easier to test
+    type MaxNumberOfStakedContracts = ConstU32<8>;
+    type MinimumStakeAmount = MinimumStakingAmount;
+    type NumberOfTiers = ConstU32<4>;
+    type WeightInfo = weights::pallet_dapp_staking_v3::SubstrateWeight<Runtime>;
+    #[cfg(feature = "runtime-benchmarks")]
+    type BenchmarkHelper = BenchmarkHelper<SmartContract<AccountId>, AccountId>;
+}
+
+pub struct InflationPayoutPerBlock;
+impl pallet_inflation::PayoutPerBlock<NegativeImbalance> for InflationPayoutPerBlock {
+    fn treasury(reward: NegativeImbalance) {
+        Balances::resolve_creating(&TreasuryPalletId::get().into_account_truncating(), reward);
+    }
+
+    fn collators(reward: NegativeImbalance) {
+        ToStakingPot::on_unbalanced(reward);
+    }
+}
+
+pub struct InflationCycleConfig;
+impl CycleConfiguration for InflationCycleConfig {
+    fn periods_per_cycle() -> u32 {
+        2
+    }
+
+    fn eras_per_voting_subperiod() -> u32 {
+        8
+    }
+
+    fn eras_per_build_and_earn_subperiod() -> u32 {
+        20
+    }
+
+    fn blocks_per_era() -> BlockNumber {
+        6 * HOURS
+    }
+}
+
+impl pallet_inflation::Config for Runtime {
+    type Currency = Balances;
+    type PayoutPerBlock = InflationPayoutPerBlock;
+    type CycleConfiguration = InflationCycleConfig;
+    type RuntimeEvent = RuntimeEvent;
+    type WeightInfo = pallet_inflation::weights::SubstrateWeight<Runtime>;
+}
+
+impl pallet_dapp_staking_migration::Config for Runtime {
+    type RuntimeEvent = RuntimeEvent;
+    type WeightInfo = pallet_dapp_staking_migration::weights::SubstrateWeight<Runtime>;
 }
 
 impl pallet_utility::Config for Runtime {
@@ -535,41 +620,6 @@ impl OnUnbalanced<NegativeImbalance> for ToStakingPot {
     }
 }
 
-pub struct DappsStakingTvlProvider();
-impl Get<Balance> for DappsStakingTvlProvider {
-    fn get() -> Balance {
-        DappsStaking::tvl()
-    }
-}
-
-pub struct BeneficiaryPayout();
-impl pallet_block_rewards_hybrid::BeneficiaryPayout<NegativeImbalance> for BeneficiaryPayout {
-    fn treasury(reward: NegativeImbalance) {
-        Balances::resolve_creating(&TreasuryPalletId::get().into_account_truncating(), reward);
-    }
-
-    fn collators(reward: NegativeImbalance) {
-        ToStakingPot::on_unbalanced(reward);
-    }
-
-    fn dapps_staking(stakers: NegativeImbalance, dapps: NegativeImbalance) {
-        DappsStaking::rewards(stakers, dapps)
-    }
-}
-
-parameter_types! {
-    pub const MaxBlockRewardAmount: Balance = 230_718 * MILLISBY;
-}
-
-impl pallet_block_rewards_hybrid::Config for Runtime {
-    type Currency = Balances;
-    type DappsStakingTvlProvider = DappsStakingTvlProvider;
-    type BeneficiaryPayout = BeneficiaryPayout;
-    type MaxBlockRewardAmount = MaxBlockRewardAmount;
-    type RuntimeEvent = RuntimeEvent;
-    type WeightInfo = pallet_block_rewards_hybrid::weights::SubstrateWeight<Runtime>;
-}
-
 parameter_types! {
     pub const ExistentialDeposit: Balance = 1_000_000;
     pub const MaxLocks: u32 = 50;
@@ -587,9 +637,9 @@ impl pallet_balances::Config for Runtime {
     type AccountStore = frame_system::Pallet<Runtime>;
     type WeightInfo = weights::pallet_balances::SubstrateWeight<Runtime>;
     type HoldIdentifier = ();
-    type FreezeIdentifier = ();
+    type FreezeIdentifier = RuntimeFreezeReason;
     type MaxHolds = ConstU32<0>;
-    type MaxFreezes = ConstU32<0>;
+    type MaxFreezes = ConstU32<1>;
 }
 
 parameter_types! {
@@ -671,7 +721,6 @@ impl pallet_contracts::Config for Runtime {
     type WeightPrice = pallet_transaction_payment::Pallet<Self>;
     type WeightInfo = pallet_contracts::weights::SubstrateWeight<Self>;
     type ChainExtension = (
-        DappsStakingExtension<Self>,
         XvmExtension<Self, Xvm, UnifiedAccounts>,
         AssetsExtension<Self, pallet_chain_extension_assets::weights::SubstrateWeight<Self>>,
         UnifiedAccountsExtension<Self, UnifiedAccounts>,
@@ -845,7 +894,7 @@ parameter_types! {
     pub BlockGasLimit: U256 = U256::from(
         NORMAL_DISPATCH_RATIO * MAXIMUM_BLOCK_WEIGHT.ref_time() / WEIGHT_PER_GAS
     );
-    pub PrecompilesValue: Precompiles = ShibuyaNetworkPrecompiles::<_, _>::new();
+    pub PrecompilesValue: Precompiles = ShibuyaPrecompiles::<_, _>::new();
     pub WeightPerGas: Weight = Weight::from_parts(WEIGHT_PER_GAS, 0);
     /// The amount of gas per PoV size. Value is calculated as:
     ///
@@ -1086,7 +1135,7 @@ pub enum ProxyType {
     /// Only reject_announcement call from pallet proxy allowed for proxy account
     CancelProxy,
     /// All runtime calls from pallet DappStaking allowed for proxy account
-    DappsStaking,
+    DappStaking,
     /// Only claim_staker call from pallet DappStaking allowed for proxy account
     StakerRewardClaim,
 }
@@ -1121,7 +1170,7 @@ impl InstanceFilter<RuntimeCall> for ProxyType {
                         | RuntimeCall::Vesting(pallet_vesting::Call::vest{..})
 				        | RuntimeCall::Vesting(pallet_vesting::Call::vest_other{..})
 				        // Specifically omitting Vesting `vested_transfer`, and `force_vested_transfer`
-                        | RuntimeCall::DappsStaking(..)
+                        | RuntimeCall::DappStaking(..)
                         // Skip entire Assets pallet
                         | RuntimeCall::CollatorSelection(..)
                         | RuntimeCall::Session(..)
@@ -1144,8 +1193,9 @@ impl InstanceFilter<RuntimeCall> for ProxyType {
             ProxyType::Balances => {
                 matches!(c, RuntimeCall::Balances(..))
             }
-            // All Runtime calls from Pallet Assets allowed for proxy account
+            // All Runtime calls from Pallet Assets and Uniques allowed for proxy account
             ProxyType::Assets => {
+                matches!(c, RuntimeCall::Assets(..) | RuntimeCall::Uniques(..))
                 matches!(c, RuntimeCall::Assets(..) | RuntimeCall::Uniques(..))
             }
             ProxyType::Governance => {
@@ -1172,13 +1222,15 @@ impl InstanceFilter<RuntimeCall> for ProxyType {
                 )
             }
             // All runtime calls from pallet DappStaking allowed for proxy account
-            ProxyType::DappsStaking => {
-                matches!(c, RuntimeCall::DappsStaking(..))
+            ProxyType::DappStaking => {
+                matches!(c, RuntimeCall::DappStaking(..))
             }
             ProxyType::StakerRewardClaim => {
                 matches!(
                     c,
-                    RuntimeCall::DappsStaking(pallet_dapps_staking::Call::claim_staker { .. })
+                    RuntimeCall::DappStaking(
+                        pallet_dapp_staking_v3::Call::claim_staker_rewards { .. }
+                    )
                 )
             }
         }
@@ -1190,7 +1242,7 @@ impl InstanceFilter<RuntimeCall> for ProxyType {
             (ProxyType::Any, _) => true,
             (_, ProxyType::Any) => false,
             (ProxyType::NonTransfer, _) => true,
-            (ProxyType::DappsStaking, ProxyType::StakerRewardClaim) => true,
+            (ProxyType::DappStaking, ProxyType::StakerRewardClaim) => true,
             _ => false,
         }
     }
@@ -1237,35 +1289,6 @@ impl pallet_unified_accounts::Config for Runtime {
     type WeightInfo = pallet_unified_accounts::weights::SubstrateWeight<Self>;
 }
 
-parameter_types! {
-    pub const UniquesCollectionDeposit: Balance = SBY / 10;
-    pub const UniquesItemDeposit: Balance = SBY / 1_000;
-    pub const UniquesMetadataDepositBase: Balance = deposit(1, 129);
-    pub const UniquesAttributeDepositBase: Balance = deposit(1, 0);
-    pub const UniquesDepositPerByte: Balance = deposit(0, 1);
-}
-
-impl pallet_uniques::Config for Runtime {
-    type RuntimeEvent = RuntimeEvent;
-    type CollectionId = CollectionId;
-    type ItemId = ItemId;
-    type Currency = Balances;
-    type ForceOrigin = AssetsForceOrigin;
-    type CollectionDeposit = UniquesCollectionDeposit;
-    type ItemDeposit = UniquesItemDeposit;
-    type MetadataDepositBase = UniquesMetadataDepositBase;
-    type AttributeDepositBase = UniquesAttributeDepositBase;
-    type DepositPerByte = UniquesDepositPerByte;
-    type StringLimit = ConstU32<128>;
-    type KeyLimit = ConstU32<32>;
-    type ValueLimit = ConstU32<64>;
-    type WeightInfo = weights::pallet_uniques::WeightInfo<Runtime>;
-    #[cfg(feature = "runtime-benchmarks")]
-    type Helper = ();
-    type CreateOrigin = AsEnsureOriginWithArg<EnsureSigned<AccountId>>;
-    type Locker = ();
-}
-
 construct_runtime!(
     pub struct Runtime where
         Block = Block,
@@ -1287,8 +1310,8 @@ construct_runtime!(
         TransactionPayment: pallet_transaction_payment = 30,
         Balances: pallet_balances = 31,
         Vesting: pallet_vesting = 32,
-        DappsStaking: pallet_dapps_staking = 34,
-        BlockReward: pallet_block_rewards_hybrid = 35,
+        DappStaking: pallet_dapp_staking_v3 = 34,
+        Inflation: pallet_inflation = 35,
         Assets: pallet_assets = 36,
         Uniques: pallet_uniques = 37,
 
@@ -1323,6 +1346,11 @@ construct_runtime!(
         Xvm: pallet_xvm = 90,
 
         Sudo: pallet_sudo = 99,
+
+        // To be removed & cleaned up after migration has been finished
+        DappStakingMigration: pallet_dapp_staking_migration = 254,
+        // Legacy dApps staking v2, to be removed after migration has been finished
+        DappsStaking: pallet_dapps_staking = 255,
     }
 );
 
@@ -1360,44 +1388,10 @@ pub type Executive = frame_executive::Executive<
     Migrations,
 >;
 
-pub use frame_support::traits::{OnRuntimeUpgrade, StorageVersion};
-pub struct HybridInflationModelMigration;
-impl OnRuntimeUpgrade for HybridInflationModelMigration {
-    fn on_runtime_upgrade() -> Weight {
-        let mut reward_config = pallet_block_rewards_hybrid::RewardDistributionConfig {
-            // 4.66%
-            treasury_percent: Perbill::from_rational(4_663_701u32, 100_000_000u32),
-            // 23.09%
-            base_staker_percent: Perbill::from_rational(2_309_024u32, 10_000_000u32),
-            // 17.31%
-            dapps_percent: Perbill::from_rational(173_094_531u32, 1_000_000_000u32),
-            // 2.99%
-            collators_percent: Perbill::from_rational(29_863_296u32, 1_000_000_000u32),
-            // 51.95%
-            adjustable_percent: Perbill::from_rational(519_502_763u32, 1_000_000_000u32),
-            // 60.00%
-            ideal_dapps_staking_tvl: Perbill::from_percent(60),
-        };
-
-        // This HAS to be tested prior to update - we need to ensure that config is consistent
-        #[cfg(feature = "try-runtime")]
-        assert!(reward_config.is_consistent());
-
-        // This should never execute but we need to have code in place that ensures config is consistent
-        if !reward_config.is_consistent() {
-            reward_config = Default::default();
-        }
-
-        pallet_block_rewards_hybrid::RewardDistributionConfigStorage::<Runtime>::put(reward_config);
-
-        <Runtime as frame_system::pallet::Config>::DbWeight::get().writes(1)
-    }
-}
-
 /// All migrations that will run on the next runtime upgrade.
 ///
 /// Once done, migrations should be removed from the tuple.
-pub type Migrations = HybridInflationModelMigration;
+pub type Migrations = ();
 
 type EventRecord = frame_system::EventRecord<
     <Runtime as frame_system::Config>::RuntimeEvent,
@@ -1475,7 +1469,9 @@ mod benches {
         [pallet_balances, Balances]
         [pallet_timestamp, Timestamp]
         [pallet_dapps_staking, DappsStaking]
-        [block_rewards_hybrid, BlockReward]
+        [pallet_dapp_staking_v3, DappStaking]
+        [pallet_inflation, Inflation]
+        [pallet_dapp_staking_migration, DappStakingMigration]
         [pallet_xc_asset_config, XcAssetConfig]
         [pallet_collator_selection, CollatorSelection]
         [pallet_xcm, PolkadotXcm]
@@ -1938,6 +1934,20 @@ impl_runtime_apis! {
             key: Vec<u8>,
         ) -> pallet_contracts_primitives::GetStorageResult {
             Contracts::get_storage(address, key)
+        }
+    }
+
+    impl dapp_staking_v3_runtime_api::DappStakingApi<Block> for Runtime {
+        fn eras_per_voting_subperiod() -> pallet_dapp_staking_v3::EraNumber {
+            InflationCycleConfig::eras_per_voting_subperiod()
+        }
+
+        fn eras_per_build_and_earn_subperiod() -> pallet_dapp_staking_v3::EraNumber {
+            InflationCycleConfig::eras_per_build_and_earn_subperiod()
+        }
+
+        fn blocks_per_era() -> BlockNumber {
+            InflationCycleConfig::blocks_per_era()
         }
     }
 

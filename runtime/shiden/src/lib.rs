@@ -70,7 +70,7 @@ pub use astar_primitives::{
     evm::EvmRevertCodeHandler, xcm::AssetLocationIdConverter, AccountId, Address, AssetId, Balance,
     BlockNumber, Hash, Header, Index, Signature,
 };
-
+pub use pallet_block_rewards_hybrid::RewardDistributionConfig;
 use pallet_evm_precompile_assets_erc20::AddressToAssetId;
 
 #[cfg(any(feature = "std", test))]
@@ -89,8 +89,8 @@ mod xcm_config;
 
 pub type ShidenAssetLocationIdConverter = AssetLocationIdConverter<AssetId, XcAssetConfig>;
 
-pub use precompiles::{ShidenNetworkPrecompiles, ASSET_PRECOMPILE_ADDRESS_PREFIX};
-pub type Precompiles = ShidenNetworkPrecompiles<Runtime, ShidenAssetLocationIdConverter>;
+pub use precompiles::{ShidenPrecompiles, ASSET_PRECOMPILE_ADDRESS_PREFIX};
+pub type Precompiles = ShidenPrecompiles<Runtime, ShidenAssetLocationIdConverter>;
 
 /// Constant values used within the runtime.
 pub const NANOSDN: Balance = 1_000_000_000;
@@ -140,7 +140,7 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
     spec_name: create_runtime_str!("shiden"),
     impl_name: create_runtime_str!("shiden"),
     authoring_version: 1,
-    spec_version: 112,
+    spec_version: 115,
     impl_version: 0,
     apis: RUNTIME_API_VERSIONS,
     transaction_version: 2,
@@ -339,6 +339,7 @@ impl pallet_dapps_staking::Config for Runtime {
     type UnbondingPeriod = UnbondingPeriod;
     type MaxEraStakeValues = MaxEraStakeValues;
     type UnregisteredDappRewardRetention = ConstU32<7>;
+    type ForcePalletDisabled = ConstBool<false>;
 }
 
 /// Multi-VM pointer to smart contract instance.
@@ -468,7 +469,7 @@ impl Get<Balance> for DappsStakingTvlProvider {
 }
 
 pub struct BeneficiaryPayout();
-impl pallet_block_reward::BeneficiaryPayout<NegativeImbalance> for BeneficiaryPayout {
+impl pallet_block_rewards_hybrid::BeneficiaryPayout<NegativeImbalance> for BeneficiaryPayout {
     fn treasury(reward: NegativeImbalance) {
         Balances::resolve_creating(&TreasuryPalletId::get().into_account_truncating(), reward);
     }
@@ -483,16 +484,16 @@ impl pallet_block_reward::BeneficiaryPayout<NegativeImbalance> for BeneficiaryPa
 }
 
 parameter_types! {
-    pub const RewardAmount: Balance = 2_664 * MILLISDN;
+    pub const MaxBlockRewardAmount: Balance = 2_313_789 * MICROSDN;
 }
 
-impl pallet_block_reward::Config for Runtime {
+impl pallet_block_rewards_hybrid::Config for Runtime {
     type Currency = Balances;
     type DappsStakingTvlProvider = DappsStakingTvlProvider;
     type BeneficiaryPayout = BeneficiaryPayout;
-    type RewardAmount = RewardAmount;
+    type MaxBlockRewardAmount = MaxBlockRewardAmount;
     type RuntimeEvent = RuntimeEvent;
-    type WeightInfo = pallet_block_reward::weights::SubstrateWeight<Runtime>;
+    type WeightInfo = pallet_block_rewards_hybrid::weights::SubstrateWeight<Runtime>;
 }
 
 parameter_types! {
@@ -768,7 +769,7 @@ parameter_types! {
     pub BlockGasLimit: U256 = U256::from(
         NORMAL_DISPATCH_RATIO * MAXIMUM_BLOCK_WEIGHT.ref_time() / WEIGHT_PER_GAS
     );
-    pub PrecompilesValue: Precompiles = ShidenNetworkPrecompiles::<_, _>::new();
+    pub PrecompilesValue: Precompiles = ShidenPrecompiles::<_, _>::new();
     pub WeightPerGas: Weight = Weight::from_parts(WEIGHT_PER_GAS, 0);
     /// The amount of gas per PoV size. Value is calculated as:
     ///
@@ -989,7 +990,7 @@ construct_runtime!(
         Balances: pallet_balances = 31,
         Vesting: pallet_vesting = 32,
         DappsStaking: pallet_dapps_staking = 34,
-        BlockReward: pallet_block_reward = 35,
+        BlockReward: pallet_block_rewards_hybrid = 35,
         Assets: pallet_assets = 36,
 
         Authorship: pallet_authorship = 40,
@@ -1131,7 +1132,7 @@ mod benches {
         [pallet_balances, Balances]
         [pallet_timestamp, Timestamp]
         [pallet_dapps_staking, DappsStaking]
-        [pallet_block_reward, BlockReward]
+        [block_rewards_hybrid, BlockReward]
         [pallet_xc_asset_config, XcAssetConfig]
         [pallet_collator_selection, CollatorSelection]
         [pallet_xcm, PolkadotXcm]
