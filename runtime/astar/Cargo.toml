@@ -1,6 +1,6 @@
 [package]
 name = "astar-runtime"
-version = "5.25.0"
+version = "5.28.0"
 build = "build.rs"
 authors.workspace = true
 edition.workspace = true
@@ -11,6 +11,7 @@ repository.workspace = true
 # third-party dependencies
 hex-literal = { workspace = true }
 log = { workspace = true, optional = true }
+num_enum = { workspace = true }
 parity-scale-codec = { workspace = true }
 scale-info = { workspace = true }
 smallvec = { workspace = true }
@@ -98,7 +99,7 @@ frame-try-runtime = { workspace = true, optional = true }
 
 # Astar pallets
 astar-primitives = { workspace = true }
-pallet-block-reward = { workspace = true }
+pallet-block-rewards-hybrid = { workspace = true }
 pallet-collator-selection = { workspace = true }
 pallet-dapps-staking = { workspace = true }
 pallet-evm-precompile-assets-erc20 = { workspace = true }
@@ -113,6 +114,7 @@ pallet-xcm = { workspace = true }
 moonbeam-evm-tracer = { workspace = true, optional = true }
 moonbeam-rpc-primitives-debug = { workspace = true, optional = true }
 moonbeam-rpc-primitives-txpool = { workspace = true, optional = true }
+precompile-utils = { workspace = true }
 
 [build-dependencies]
 substrate-wasm-builder = { workspace = true, optional = true }
@@ -144,7 +146,7 @@ std = [
 	"pallet-aura/std",
 	"pallet-balances/std",
 	"pallet-proxy/std",
-	"pallet-block-reward/std",
+	"pallet-block-rewards-hybrid/std",
 	"pallet-dapps-staking/std",
 	"pallet-evm-precompile-dapps-staking/std",
 	"pallet-evm-precompile-sr25519/std",
@@ -213,7 +215,7 @@ runtime-benchmarks = [
 	'pallet-collective/runtime-benchmarks',
 	"pallet-ethereum/runtime-benchmarks",
 	"pallet-dapps-staking/runtime-benchmarks",
-	"pallet-block-reward/runtime-benchmarks",
+	"pallet-block-rewards-hybrid/runtime-benchmarks",
 	"pallet-xcm/runtime-benchmarks",
 	"xcm-builder/runtime-benchmarks",
 	"pallet-xc-asset-config/runtime-benchmarks",
@@ -233,9 +235,8 @@ try-runtime = [
 	"pallet-aura/try-runtime",
 	"pallet-balances/try-runtime",
 	"pallet-proxy/try-runtime",
-	"pallet-block-reward/try-runtime",
+	"pallet-block-rewards-hybrid/try-runtime",
 	"pallet-dapps-staking/try-runtime",
-	"pallet-block-reward/try-runtime",
 	"pallet-sudo/try-runtime",
 	"pallet-timestamp/try-runtime",
 	"pallet-transaction-payment/try-runtime",
