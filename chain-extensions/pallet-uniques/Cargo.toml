@@ -2,6 +2,7 @@
 name = "pallet-chain-extension-uniques"
 version = "0.1.0"
 license = "Apache-2.0"
+
 description = "Assets chain extension for WASM contracts"
 authors.workspace = true
 edition.workspace = true

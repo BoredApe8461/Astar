@@ -18,3 +18,4 @@
 
 pub mod pallet_assets;
 pub mod pallet_xcm;
+pub mod pallet_uniques;

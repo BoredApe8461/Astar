@@ -18,10 +18,10 @@
 
 use super::*;
 
-use fp_evm::IsPrecompileResult;
+use fp_evm::{IsPrecompileResult, Precompile};
 use frame_support::{
     construct_runtime, parameter_types,
-    traits::{ConstU64, Currency, OnFinalize, OnInitialize},
+    traits::{ConstBool, ConstU64, Currency, OnFinalize, OnInitialize},
     weights::{RuntimeDbWeight, Weight},
     PalletId,
 };
@@ -120,14 +120,14 @@ impl From<TestAccount> for H160 {
     }
 }
 
-trait H160Conversion {
-    fn to_h160(&self) -> H160;
-}
-
-impl H160Conversion for AccountId32 {
-    fn to_h160(&self) -> H160 {
-        let x = self.encode()[31];
-        H160::repeat_byte(x)
+impl From<H160> for TestAccount {
+    fn from(address: H160) -> TestAccount {
+        match address {
+            a if a == H160::repeat_byte(0x01) => TestAccount::Alex,
+            a if a == H160::repeat_byte(0x02) => TestAccount::Bobo,
+            a if a == H160::repeat_byte(0x03) => TestAccount::Dino,
+            _ => Default::default(),
+        }
     }
 }
 
@@ -228,6 +228,8 @@ where
     }
 }
 
+pub type PrecompileCall = DappsStakingWrapperCall<TestRuntime>;
+
 parameter_types! {
     pub PrecompilesValue: DappPrecompile<TestRuntime> = DappPrecompile(Default::default());
     pub WeightPerGas: Weight = Weight::from_parts(1, 0);
@@ -307,6 +309,7 @@ impl pallet_dapps_staking::Config for TestRuntime {
     type UnbondingPeriod = UnbondingPeriod;
     type MaxEraStakeValues = MaxEraStakeValues;
     type UnregisteredDappRewardRetention = ConstU32<2>;
+    type ForcePalletDisabled = ConstBool<false>;
 }
 
 pub struct ExternalityBuilder {

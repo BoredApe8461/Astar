@@ -15,11 +15,11 @@ members = [
 
 	"primitives",
 
-	"chain-extensions/dapps-staking",
 	"chain-extensions/pallet-assets",
 	"chain-extensions/pallet-uniques",
 	"chain-extensions/xvm",
 	"chain-extensions/unified-accounts",
+	"chain-extensions/pallet-uniques",
 	"chain-extensions/types/*",
 
 	"vendor/evm-tracing",
@@ -44,8 +44,261 @@ exclude = ["vendor"]
 panic = "unwind"
 
 [patch."https://github.com/paritytech/substrate"]
-pallet-contracts = { git = "https://github.com/AstarNetwork/substrate", branch = "astar-polkadot-v0.9.43" }
-pallet-contracts-primitives = { git = "https://github.com/AstarNetwork/substrate", branch = "astar-polkadot-v0.9.43" }
+node-template = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+frame-benchmarking = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+frame-support = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+frame-support-procedural = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+frame-support-procedural-tools = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+frame-support-procedural-tools-derive = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+sp-api = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+sp-api-proc-macro = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+sp-core = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+sp-core-hashing = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+sp-std = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+sp-debug-derive = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+sp-externalities = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+sp-storage = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+sp-runtime-interface = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+sp-runtime-interface-proc-macro = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+sp-tracing = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+sp-wasm-interface = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+sp-io = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+sp-keystore = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+sp-state-machine = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+sp-panic-handler = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+sp-trie = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+sp-runtime = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+sp-application-crypto = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+sp-arithmetic = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+sp-weights = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+substrate-test-runtime-client = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+sc-block-builder = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+sc-client-api = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+substrate-prometheus-endpoint = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+sc-executor = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+sc-executor-common = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+sc-allocator = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+sp-maybe-compressed-blob = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+sc-executor-wasmtime = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+sc-runtime-test = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+substrate-wasm-builder = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+sp-version = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+sp-core-hashing-proc-macro = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+sp-version-proc-macro = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+sc-tracing = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+sc-rpc-server = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+sc-tracing-proc-macro = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+sp-blockchain = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+sp-consensus = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+sp-inherents = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+sp-test-primitives = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+sp-database = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+sp-rpc = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+substrate-test-runtime = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+frame-executive = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+frame-system = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+frame-try-runtime = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+pallet-balances = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+pallet-transaction-payment = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+frame-system-rpc-runtime-api = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+pallet-babe = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+pallet-authorship = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+pallet-session = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+pallet-timestamp = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+sp-timestamp = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+sp-session = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+sp-staking = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+sp-consensus-babe = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+sp-consensus-slots = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+frame-election-provider-support = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+frame-election-provider-solution-type = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+sp-npos-elections = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+substrate-test-utils = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+substrate-test-utils-derive = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+sc-service = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+sc-chain-spec = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+sc-chain-spec-derive = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+sc-network = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+sc-consensus = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+sc-utils = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+sc-network-common = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+sc-peerset = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+sp-consensus-grandpa = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+sc-network-light = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+sc-network-sync = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+fork-tree = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+sc-telemetry = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+sc-client-db = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+sc-state-db = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+kitchensink-runtime = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+frame-benchmarking-pallet-pov = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+frame-system-benchmarking = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+node-primitives = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+pallet-alliance = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+pallet-collective = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+pallet-identity = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+pallet-asset-rate = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+pallet-asset-tx-payment = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+pallet-assets = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+pallet-authority-discovery = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+sp-authority-discovery = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+pallet-bags-list = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+pallet-bounties = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+pallet-treasury = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+pallet-utility = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+pallet-root-testing = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+pallet-child-bounties = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+pallet-contracts-proc-macro = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+pallet-insecure-randomness-collective-flip = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+pallet-proxy = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+pallet-conviction-voting = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+pallet-scheduler = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+pallet-preimage = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+pallet-core-fellowship = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+pallet-democracy = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+pallet-election-provider-multi-phase = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+pallet-election-provider-support-benchmarking = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+pallet-elections-phragmen = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+pallet-fast-unstake = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+pallet-staking = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+pallet-staking-reward-curve = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+pallet-glutton = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+pallet-grandpa = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+pallet-offences = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+sp-keyring = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+pallet-im-online = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+pallet-indices = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+pallet-lottery = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+frame-support-test = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+frame-support-test-pallet = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+pallet-membership = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+pallet-message-queue = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+pallet-mmr = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+sp-mmr-primitives = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+pallet-multisig = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+pallet-nft-fractionalization = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+pallet-nfts = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+pallet-nfts-runtime-api = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+pallet-nis = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+pallet-nomination-pools = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+pallet-nomination-pools-benchmarking = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+pallet-nomination-pools-runtime-api = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+pallet-offences-benchmarking = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+pallet-ranked-collective = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+pallet-recovery = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+pallet-referenda = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+pallet-remark = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+pallet-salary = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+pallet-session-benchmarking = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+pallet-society = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+pallet-staking-runtime-api = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+pallet-state-trie-migration = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+frame-remote-externalities = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+substrate-rpc-client = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+sc-rpc-api = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+sc-transaction-pool-api = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+substrate-state-trie-migration-rpc = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+pallet-statement = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+sp-statement-store = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+pallet-sudo = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+pallet-tips = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+pallet-transaction-payment-rpc-runtime-api = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+pallet-transaction-storage = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+sp-transaction-storage-proof = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+pallet-uniques = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+pallet-vesting = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+pallet-whitelist = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+sp-block-builder = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+sp-offchain = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+sp-transaction-pool = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+sc-informant = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+sc-keystore = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+sc-network-bitswap = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+sc-network-transactions = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+sc-offchain = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+sc-transaction-pool = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+substrate-test-runtime-transaction-pool = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+sc-rpc = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+sc-rpc-spec-v2 = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+sc-storage-monitor = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+sc-sysinfo = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+pallet-beefy-mmr = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+binary-merkle-tree = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+pallet-beefy = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+sp-consensus-beefy = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+sp-consensus-aura = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+substrate-test-client = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+sp-runtime-interface-test-wasm = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+sp-metadata-ir = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+frame-benchmarking-cli = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+sc-cli = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+node-template-runtime = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+pallet-aura = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+pallet-template = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+pallet-transaction-payment-rpc = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+sc-basic-authorship = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+sc-proposer-metrics = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+sc-consensus-aura = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+sc-consensus-slots = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+sc-network-test = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+sc-consensus-grandpa = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+sc-network-gossip = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+sc-statement-store = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+substrate-frame-rpc-system = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+try-runtime-cli = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+substrate-cli-test-utils = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+substrate-build-script-utils = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+node-bench = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+node-testing = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+node-executor = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+node-cli = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+node-inspect = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+node-rpc = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+mmr-rpc = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+sc-consensus-babe = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+sc-consensus-epochs = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+sc-consensus-babe-rpc = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+sc-consensus-grandpa-rpc = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+sc-sync-state-rpc = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+sc-authority-discovery = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+sc-network-statement = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+sc-service-test = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+substrate-frame-cli = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+chain-spec-builder = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+subkey = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+sc-consensus-beefy = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+sc-consensus-beefy-rpc = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+sc-consensus-manual-seal = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+sc-consensus-pow = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+sp-consensus-pow = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+mmr-gadget = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+pallet-atomic-swap = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+pallet-bags-list-fuzzer = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+pallet-bags-list-remote-tests = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+pallet-election-provider-e2e-test = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+frame-election-solution-type-fuzzer = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+pallet-example-basic = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+pallet-example-offchain-worker = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+pallet-dev-mode = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+pallet-nicks = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+pallet-node-authorization = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+pallet-nomination-pools-fuzzer = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+pallet-nomination-pools-test-staking = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+pallet-scored-pool = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+pallet-staking-reward-fn = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+pallet-root-offences = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+frame-support-test-compile-pass = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+sp-api-test = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+sp-application-crypto-test = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+sp-arithmetic-fuzzer = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+sp-npos-elections-fuzzer = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+sp-runtime-interface-test = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+sp-runtime-interface-test-wasm-deprecated = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+node-template-release = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+substrate-test-utils-test-crate = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+substrate-frame-rpc-support = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+generate-bags = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
+node-runtime-generate-bags = { git = "https://github.com/Szegoo/substrate.git", branch = "polkadot-v0.9.43-patch" }
 
 [workspace.package]
 authors = ["Stake Technologies <devops@stake.co.jp>"]
@@ -154,6 +407,7 @@ pallet-assets = { git = "https://github.com/paritytech/substrate", branch = "pol
 pallet-uniques = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.43", default-features = false }
 pallet-balances = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.43", default-features = false }
 pallet-proxy = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.43", default-features = false }
+pallet-uniques = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.43", default-features = false }
 pallet-utility = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.43", default-features = false }
 frame-support = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.43", default-features = false }
 frame-system = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.43", default-features = false }
@@ -274,15 +528,19 @@ orml-xcm-support = { git = "https://github.com/open-web3-stack/open-runtime-modu
 
 # Astar pallets & modules
 # (wasm)
-pallet-block-reward = { path = "./pallets/block-reward", default-features = false }
 pallet-block-rewards-hybrid = { path = "./pallets/block-rewards-hybrid", default-features = false }
 pallet-collator-selection = { path = "./pallets/collator-selection", default-features = false }
 pallet-dapps-staking = { path = "./pallets/dapps-staking", default-features = false }
+pallet-dapp-staking-v3 = { path = "./pallets/dapp-staking-v3", default-features = false }
+pallet-dapp-staking-migration = { path = "./pallets/dapp-staking-migration", default-features = false }
 pallet-xc-asset-config = { path = "./pallets/xc-asset-config", default-features = false }
 pallet-xvm = { path = "./pallets/xvm", default-features = false }
 pallet-ethereum-checked = { path = "./pallets/ethereum-checked", default-features = false }
+pallet-inflation = { path = "./pallets/inflation", default-features = false }
 pallet-dynamic-evm-base-fee = { path = "./pallets/dynamic-evm-base-fee", default-features = false }
 pallet-unified-accounts = { path = "./pallets/unified-accounts", default-features = false }
+
+dapp-staking-v3-runtime-api = { path = "./pallets/dapp-staking-v3/rpc/runtime-api", default-features = false }
 
 astar-primitives = { path = "./primitives", default-features = false }
 astar-test-utils = { path = "./tests/utils", default-features = false }
@@ -293,21 +551,22 @@ pallet-evm-precompile-substrate-ecdsa = { path = "./precompiles/substrate-ecdsa"
 pallet-evm-precompile-xcm = { path = "./precompiles/xcm", default-features = false }
 pallet-evm-precompile-xvm = { path = "./precompiles/xvm", default-features = false }
 pallet-evm-precompile-dapps-staking = { path = "./precompiles/dapps-staking", default-features = false }
+pallet-evm-precompile-dapp-staking-v3 = { path = "./precompiles/dapp-staking-v3", default-features = false }
+pallet-evm-precompile-unified-accounts = { path = "./precompiles/unified-accounts", default-features = false }
 
-pallet-chain-extension-dapps-staking = { path = "./chain-extensions/dapps-staking", default-features = false }
 pallet-chain-extension-xvm = { path = "./chain-extensions/xvm", default-features = false }
 pallet-chain-extension-assets = { path = "./chain-extensions/pallet-assets", default-features = false }
 pallet-chain-extension-uniques = { path = "./chain-extensions/pallet-uniques", default-features = false }
 pallet-chain-extension-unified-accounts = { path = "./chain-extensions/unified-accounts", default-features = false }
+pallet-chain-extension-uniques = { path = "./chain-extensions/pallet-uniques", default-features = false }
 
-dapps-staking-chain-extension-types = { path = "./chain-extensions/types/dapps-staking", default-features = false }
 xvm-chain-extension-types = { path = "./chain-extensions/types/xvm", default-features = false }
 assets-chain-extension-types = { path = "./chain-extensions/types/assets", default-features = false }
 uniques-chain-extension-types = { path = "./chain-extensions/types/uniques", default-features = false }
 unified-accounts-chain-extension-types = { path = "./chain-extensions/types/unified-accounts", default-features = false }
+uniques-chain-extension-types = { path = "./chain-extensions/types/uniques", default-features = false }
 
 precompile-utils = { path = "./precompiles/utils", default-features = false }
-precompile-utils-v2 = { path = "./precompiles/utils_v2", default-features = false }
 
 local-runtime = { path = "./runtime/local", default-features = false }
 shibuya-runtime = { path = "./runtime/shibuya", default-features = false }
