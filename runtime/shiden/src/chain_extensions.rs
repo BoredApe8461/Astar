@@ -16,6 +16,22 @@
 // You should have received a copy of the GNU General Public License
 // along with Astar. If not, see <http://www.gnu.org/licenses/>.
 
-pub mod pallet_assets;
-pub mod pallet_xcm;
-pub mod pallet_uniques;
+use super::Runtime;
+
+pub use chain_extension_block_number_provider::BlockNumberProviderExtension;
+pub use pallet_chain_extension_uniques::UniquesExtension;
+use pallet_contracts::chain_extension::RegisteredChainExtension;
+
+// Following impls defines chain extension IDs.
+
+impl<W: pallet_chain_extension_uniques::weights::WeightInfo> RegisteredChainExtension<Runtime>
+    for UniquesExtension<Runtime, W>
+{
+    const ID: u16 = 04;
+}
+
+impl<W: chain_extension_block_number_provider::weights::WeightInfo>
+    RegisteredChainExtension<Runtime> for BlockNumberProviderExtension<Runtime, W>
+{
+    const ID: u16 = 05;
+}

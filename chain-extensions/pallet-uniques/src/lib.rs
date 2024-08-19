@@ -20,10 +20,8 @@
 
 pub mod weights;
 
-use frame_support::traits::{
-    nonfungibles::{Inspect, InspectEnumerable},
-    Currency,
-};
+
+use frame_support::traits::nonfungibles::{Inspect, InspectEnumerable};
 use pallet_contracts::chain_extension::{
     ChainExtension, Environment, Ext, InitState, RetVal, SysConfig,
 };
@@ -34,7 +32,10 @@ use sp_runtime::BoundedVec;
 use sp_runtime::DispatchError;
 use sp_std::marker::PhantomData;
 use sp_std::vec::Vec;
-use uniques_chain_extension_types::Outcome;
+
+
+use uniques_chain_extension_types::{select_origin, Origin, Outcome};
+
 
 type AccountIdLookup<T> = <<T as SysConfig>::Lookup as StaticLookup>::Source;
 type DepositBalanceOf<T> =
@@ -160,31 +161,7 @@ where
                 let can_transfer = pallet_uniques::Pallet::<T>::can_transfer(&collection_id, &item);
                 env.write(&can_transfer.encode(), false, None)?;
             }
-            UniquesFunc::Collection => {
-                let collection_id: <T as pallet_uniques::Config>::CollectionId = env.read_as()?;
 
-                let collection: Option<CollectionDetails<T::AccountId, DepositBalanceOf<T>>> =
-                    pallet_uniques::Collection::<T>::get(&collection_id);
-
-                let base_weight = <W as weights::WeightInfo>::collection();
-                env.charge_weight(base_weight)?;
-
-                env.write(&collection.encode(), false, None)?;
-            }
-            UniquesFunc::Item => {
-                let (collection_id, item_id): (
-                    <T as pallet_uniques::Config>::CollectionId,
-                    <T as pallet_uniques::Config>::ItemId,
-                ) = env.read_as()?;
-
-                let item: Option<ItemDetails<T::AccountId, DepositBalanceOf<T>>> =
-                    pallet_uniques::Item::<T>::get(&collection_id, &item_id);
-
-                let base_weight = <W as weights::WeightInfo>::item();
-                env.charge_weight(base_weight)?;
-
-                env.write(&item.encode(), false, None)?;
-            }
             UniquesFunc::Collections => {
                 let read_bound: u32 = env.read_as()?;
 

@@ -18,6 +18,7 @@
 
 use super::{Runtime, UnifiedAccounts, Xvm};
 
+pub use chain_extension_block_number_provider::BlockNumberProviderExtension;
 /// Registered WASM contracts chain extensions.
 pub use pallet_chain_extension_assets::AssetsExtension;
 pub use pallet_chain_extension_uniques::UniquesExtension;
@@ -47,3 +48,4 @@ impl<W: pallet_chain_extension_uniques::weights::WeightInfo> RegisteredChainExte
 {
     const ID: u16 = 04;
 }
+

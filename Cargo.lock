@@ -1252,6 +1252,24 @@ dependencies = [
 ]
 
 [[package]]
+name = "chain-extension-block-number-provider"
+version = "0.1.0"
+dependencies = [
+ "cumulus-pallet-parachain-system",
+ "frame-support",
+ "frame-system",
+ "log",
+ "num-traits",
+ "pallet-contracts",
+ "pallet-contracts-primitives",
+ "parity-scale-codec",
+ "scale-info",
+ "sp-core",
+ "sp-runtime",
+ "sp-std",
+]
+
+[[package]]
 name = "chrono"
 version = "0.4.26"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -6009,6 +6027,7 @@ version = "5.28.0"
 dependencies = [
  "array-bytes 6.1.0",
  "astar-primitives",
+ "chain-extension-block-number-provider",
  "dapp-staking-v3-runtime-api",
  "fp-rpc",
  "fp-self-contained",
@@ -7479,6 +7498,25 @@ dependencies = [
  "pallet-assets",
  "pallet-contracts",
  "pallet-contracts-primitives",
+ "parity-scale-codec",
+ "scale-info",
+ "sp-core",
+ "sp-runtime",
+ "sp-std",
+]
+
+[[package]]
+name = "pallet-chain-extension-dapps-staking"
+version = "1.1.0"
+dependencies = [
+ "dapps-staking-chain-extension-types",
+ "frame-support",
+ "frame-system",
+ "log",
+ "num-traits",
+ "pallet-contracts",
+ "pallet-contracts-primitives",
+ "pallet-dapps-staking",
  "parity-scale-codec",
  "scale-info",
  "sp-core",
@@ -13176,6 +13214,7 @@ version = "5.28.0"
 dependencies = [
  "array-bytes 6.1.0",
  "astar-primitives",
+ "chain-extension-block-number-provider",
  "cumulus-pallet-aura-ext",
  "cumulus-pallet-dmp-queue",
  "cumulus-pallet-parachain-system",
@@ -13291,6 +13330,7 @@ version = "5.28.0"
 dependencies = [
  "array-bytes 6.1.0",
  "astar-primitives",
+ "chain-extension-block-number-provider",
  "cumulus-pallet-aura-ext",
  "cumulus-pallet-dmp-queue",
  "cumulus-pallet-parachain-system",
@@ -13321,6 +13361,7 @@ dependencies = [
  "pallet-authorship",
  "pallet-balances",
  "pallet-block-rewards-hybrid",
+ "pallet-chain-extension-uniques",
  "pallet-collator-selection",
  "pallet-collective",
  "pallet-contracts",
@@ -13350,6 +13391,7 @@ dependencies = [
  "pallet-timestamp",
  "pallet-transaction-payment",
  "pallet-transaction-payment-rpc-runtime-api",
+ "pallet-uniques",
  "pallet-utility",
  "pallet-vesting",
  "pallet-xc-asset-config",
@@ -15426,6 +15468,7 @@ dependencies = [
  "pallet-contracts",
  "parity-scale-codec",
  "scale-info",
+ "sp-runtime",
 ]
 
 [[package]]

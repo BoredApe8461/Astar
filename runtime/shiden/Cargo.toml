@@ -59,6 +59,7 @@ pallet-identity = { workspace = true }
 pallet-insecure-randomness-collective-flip = { workspace = true }
 pallet-multisig = { workspace = true }
 pallet-proxy = { workspace = true }
+pallet-uniques = { workspace = true }
 pallet-session = { workspace = true, features = ["historical"] }
 pallet-sudo = { workspace = true }
 pallet-timestamp = { workspace = true }
@@ -111,6 +112,10 @@ pallet-evm-precompile-substrate-ecdsa = { workspace = true }
 pallet-evm-precompile-xcm = { workspace = true }
 pallet-xc-asset-config = { workspace = true }
 pallet-xcm = { workspace = true }
+
+# chain-extensions
+pallet-chain-extension-uniques = { workspace = true }
+chain-extension-block-number-provider = { workspace = true }
 
 precompile-utils = { workspace = true }
 
@@ -173,6 +178,8 @@ std = [
 	"pallet-session/std",
 	"pallet-utility/std",
 	"pallet-proxy/std",
+	"pallet-uniques/std",
+	"pallet-chain-extension-uniques/std",
 	"pallet-timestamp/std",
 	"pallet-vesting/std",
 	"sp-offchain/std",
@@ -254,6 +261,7 @@ try-runtime = [
 	"pallet-identity/try-runtime",
 	"pallet-multisig/try-runtime",
 	"pallet-proxy/try-runtime",
+	"pallet-uniques/try-runtime",
 	"pallet-insecure-randomness-collective-flip/try-runtime",
 	"pallet-contracts/try-runtime",
 	"cumulus-pallet-aura-ext/try-runtime",

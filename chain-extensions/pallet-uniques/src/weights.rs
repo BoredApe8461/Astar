@@ -23,15 +23,12 @@
 use frame_support::{traits::Get, weights::{Weight, constants::RocksDbWeight}};
 use sp_std::marker::PhantomData;
 
-/// Weight functions needed for pallet-uniques chain-extension.
 pub trait WeightInfo {
     fn owner() -> Weight;
     fn collection_owner() -> Weight;
     fn attribute() -> Weight;
     fn collection_attribute() -> Weight;
     fn can_transfer() -> Weight;
-    fn collection() -> Weight;
-    fn item() -> Weight;
     fn collections(n: u32) -> Weight;
     fn items(n: u32) -> Weight;
     fn owned(n: u32) -> Weight;
@@ -58,7 +55,8 @@ impl<T: frame_system::Config> WeightInfo for SubstrateWeight<T> {
     }
 
     fn can_transfer() -> Weight {
-        T::DbWeight::get().reads(2 as u64)
+
+        T::DbWeight::get().reads(1 as u64)
     }
 
     fn collection() -> Weight {

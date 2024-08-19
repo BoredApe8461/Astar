@@ -119,10 +119,7 @@ impl MatchesNonFungibles<CollectionId, ItemId> for MultiAssetToUniquesConverter 
             (NonFungible(ref instance), Concrete(ref class)) => (instance, class),
             _ => return Err(MatchError::AssetNotHandled),
         };
-        let collection_id: CollectionId = XcAssetConfig::get_asset_id(*class)
-            .ok_or(MatchError::AssetNotHandled)?
-            .try_into()
-            .map_err(|_| MatchError::AssetIdConversionFailed)?;
+        let collection_id = XcAssetConfig::get_asset_id(*class).unwrap();
 
         let item_id = match instance {
             Index(indx) => *indx,
@@ -136,11 +133,8 @@ impl MatchesNonFungibles<CollectionId, ItemId> for MultiAssetToUniquesConverter 
 pub type NonFungiblesTransactor = NonFungiblesAdapter<
     // Use the uniques pallet:
     Uniques,
-    // This will handle any non-fungible asset which is registered in xc-assets pallet.
     MultiAssetToUniquesConverter,
-    // Convert an XCM MultiLocation into a local account id:
     LocationToAccountId,
-    // This chain's account ID type (we can't get away without mentioning it explicitly):
     AccountId,
     // We don't support teleport so no need to check any assets.
     NoChecking,
@@ -195,6 +189,7 @@ match_types! {
 
 pub type XcmBarrier = (
     TakeWeightCredit,
+    AllowUnpaidExecutionFrom<Everything>,
     AllowTopLevelPaidExecutionFrom<Everything>,
     // This will first calculate the derived origin, before checking it against the barrier implementation
     WithComputedOrigin<AllowTopLevelPaidExecutionFrom<Everything>, UniversalLocation, ConstU32<8>>,
@@ -222,7 +217,7 @@ impl xcm_executor::Config for XcmConfig {
     type XcmSender = XcmRouter;
     type AssetTransactor = AssetTransactors;
     type OriginConverter = XcmOriginToTransactDispatchOrigin;
-    type IsReserve = ReserveAssetFilter;
+    type IsReserve = Everything;
     type IsTeleporter = ();
     type UniversalLocation = UniversalLocation;
     type Barrier = XcmBarrier;
