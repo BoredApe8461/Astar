@@ -20,19 +20,26 @@
 
 pub mod weights;
 
+
 use frame_support::traits::nonfungibles::{Inspect, InspectEnumerable};
 use pallet_contracts::chain_extension::{
     ChainExtension, Environment, Ext, InitState, RetVal, SysConfig,
 };
+use pallet_uniques::{CollectionDetails, ItemDetails};
 use parity_scale_codec::Encode;
 use sp_runtime::traits::StaticLookup;
 use sp_runtime::BoundedVec;
 use sp_runtime::DispatchError;
 use sp_std::marker::PhantomData;
 use sp_std::vec::Vec;
-use uniques_chain_extension_types::Outcome;
+
+
+use uniques_chain_extension_types::{select_origin, Origin, Outcome};
+
 
 type AccountIdLookup<T> = <<T as SysConfig>::Lookup as StaticLookup>::Source;
+type DepositBalanceOf<T> =
+    <<T as pallet_uniques::Config>::Currency as Currency<<T as SysConfig>::AccountId>>::Balance;
 
 enum UniquesFunc {
     Owner,
@@ -40,6 +47,8 @@ enum UniquesFunc {
     Attribute,
     CollectionAttribute,
     CanTransfer,
+    Collection,
+    Item,
     Collections,
     Items,
     Owned,
@@ -56,10 +65,12 @@ impl TryFrom<u16> for UniquesFunc {
             3 => Ok(UniquesFunc::Attribute),
             4 => Ok(UniquesFunc::CollectionAttribute),
             5 => Ok(UniquesFunc::CanTransfer),
-            6 => Ok(UniquesFunc::Collections),
-            7 => Ok(UniquesFunc::Items),
-            8 => Ok(UniquesFunc::Owned),
-            9 => Ok(UniquesFunc::OwnedInCollection),
+            6 => Ok(UniquesFunc::Collection),
+            7 => Ok(UniquesFunc::Item),
+            8 => Ok(UniquesFunc::Collections),
+            9 => Ok(UniquesFunc::Items),
+            10 => Ok(UniquesFunc::Owned),
+            11 => Ok(UniquesFunc::OwnedInCollection),
             _ => Err(DispatchError::Other(
                 "Unimplemented func_id for UniquesFunc",
             )),
@@ -150,6 +161,7 @@ where
                 let can_transfer = pallet_uniques::Pallet::<T>::can_transfer(&collection_id, &item);
                 env.write(&can_transfer.encode(), false, None)?;
             }
+
             UniquesFunc::Collections => {
                 let read_bound: u32 = env.read_as()?;
 

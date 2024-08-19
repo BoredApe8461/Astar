@@ -29,7 +29,7 @@ use frame_support::{
     parameter_types,
     traits::{
         AsEnsureOriginWithArg, ConstU32, Contains, Currency, FindAuthor, Get, Imbalance,
-        InstanceFilter, Nothing, OnFinalize, OnUnbalanced, WithdrawReasons,
+        InstanceFilter, Everything, OnFinalize, OnUnbalanced, WithdrawReasons,
     },
     weights::{
         constants::{
@@ -86,6 +86,9 @@ pub use sp_runtime::BuildStorage;
 mod precompiles;
 mod weights;
 mod xcm_config;
+mod chain_extensions;
+
+use chain_extensions::*;
 
 pub type ShidenAssetLocationIdConverter = AssetLocationIdConverter<AssetId, XcAssetConfig>;
 
@@ -133,6 +136,9 @@ pub fn wasm_binary_unwrap() -> &'static [u8] {
                         production chains. Please rebuild with the flag disabled.",
     )
 }
+
+pub type CollectionId = u32;
+pub type ItemId = u128;
 
 /// Runtime version.
 #[sp_version::runtime_version]
@@ -610,14 +616,20 @@ impl pallet_contracts::Config for Runtime {
     /// and make sure they are stable. Dispatchables exposed to contracts are not allowed to
     /// change because that would break already deployed contracts. The `Call` structure itself
     /// is not allowed to change the indices of existing pallets, too.
-    type CallFilter = Nothing;
+    type CallFilter = Everything;
     type DepositPerItem = DepositPerItem;
     type DepositPerByte = DepositPerByte;
     type DefaultDepositLimit = DefaultDepositLimit;
     type CallStack = [pallet_contracts::Frame<Self>; 5];
     type WeightPrice = pallet_transaction_payment::Pallet<Self>;
-    type WeightInfo = pallet_contracts::weights::SubstrateWeight<Self>;
-    type ChainExtension = ();
+    type WeightInfo = pallet_contracts::weights::SubstrateWeight<Self>; 
+    type ChainExtension = (
+        UniquesExtension<Self, pallet_chain_extension_uniques::weights::SubstrateWeight<Self>>,
+        BlockNumberProviderExtension<
+            Self,
+            chain_extension_block_number_provider::weights::SubstrateWeight<Self>,
+        >,
+    );
     type Schedule = Schedule;
     type AddressGenerator = pallet_contracts::DefaultAddressGenerator;
     type MaxCodeLen = ConstU32<{ 123 * 1024 }>;
@@ -907,7 +919,7 @@ impl InstanceFilter<RuntimeCall> for ProxyType {
                 matches!(c, RuntimeCall::Balances(..))
             }
             ProxyType::Assets => {
-                matches!(c, RuntimeCall::Assets(..))
+                matches!(c, RuntimeCall::Assets(..) | RuntimeCall::Uniques(..))
             }
             ProxyType::IdentityJudgement => {
                 matches!(
@@ -970,6 +982,35 @@ impl pallet_proxy::Config for Runtime {
     type AnnouncementDepositFactor = AnnouncementDepositFactor;
 }
 
+parameter_types! {
+    pub const UniquesCollectionDeposit: Balance = 10 * SDN;
+    pub const UniquesItemDeposit: Balance = 1 * SDN;
+    pub const UniquesMetadataDepositBase: Balance = deposit(1, 129);
+    pub const UniquesAttributeDepositBase: Balance = deposit(1, 0);
+    pub const UniquesDepositPerByte: Balance = deposit(0, 1);
+}
+
+impl pallet_uniques::Config for Runtime {
+    type RuntimeEvent = RuntimeEvent;
+    type CollectionId = CollectionId;
+    type ItemId = ItemId;
+    type Currency = Balances;
+    type ForceOrigin = EnsureRoot<AccountId>;
+    type CollectionDeposit = UniquesCollectionDeposit;
+    type ItemDeposit = UniquesItemDeposit;
+    type MetadataDepositBase = UniquesMetadataDepositBase;
+    type AttributeDepositBase = UniquesAttributeDepositBase;
+    type DepositPerByte = UniquesDepositPerByte;
+    type StringLimit = ConstU32<128>;
+    type KeyLimit = ConstU32<32>;
+    type ValueLimit = ConstU32<64>;
+    type WeightInfo = weights::pallet_uniques::WeightInfo<Runtime>;
+    #[cfg(feature = "runtime-benchmarks")]
+    type Helper = ();
+    type CreateOrigin = AsEnsureOriginWithArg<EnsureSigned<AccountId>>;
+    type Locker = ();
+}
+
 construct_runtime!(
     pub struct Runtime where
         Block = Block,
@@ -992,6 +1033,7 @@ construct_runtime!(
         DappsStaking: pallet_dapps_staking = 34,
         BlockReward: pallet_block_rewards_hybrid = 35,
         Assets: pallet_assets = 36,
+        Uniques: pallet_uniques = 37,
 
         Authorship: pallet_authorship = 40,
         CollatorSelection: pallet_collator_selection = 41,
@@ -1137,6 +1179,7 @@ mod benches {
         [pallet_collator_selection, CollatorSelection]
         [pallet_xcm, PolkadotXcm]
         [pallet_dynamic_evm_base_fee, DynamicEvmBaseFee]
+        [pallet_uniques, Uniques]
     );
 }
 

@@ -98,6 +98,7 @@ moonbeam-rpc-primitives-txpool = { workspace = true, optional = true }
 pallet-chain-extension-assets = { workspace = true }
 pallet-chain-extension-uniques = { workspace = true }
 
+
 # benchmarking
 array-bytes = { workspace = true }
 frame-benchmarking = { workspace = true, optional = true }

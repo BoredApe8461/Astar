@@ -16,6 +16,22 @@
 // You should have received a copy of the GNU General Public License
 // along with Astar. If not, see <http://www.gnu.org/licenses/>.
 
-pub mod pallet_assets;
-pub mod pallet_xcm;
-pub mod pallet_uniques;
+#![cfg_attr(rustfmt, rustfmt_skip)]
+#![allow(unused_parens)]
+#![allow(unused_imports)]
+
+use frame_support::{traits::Get, weights::{Weight, constants::RocksDbWeight}};
+use sp_std::marker::PhantomData;
+
+/// Weight functions needed for block number provider chain-extension.
+pub trait WeightInfo {
+    fn relay_chain_block_number() -> Weight;
+}
+
+/// Weights for block number provider chain-extension
+pub struct SubstrateWeight<T>(PhantomData<T>);
+impl<T: frame_system::Config> WeightInfo for SubstrateWeight<T> {
+    fn relay_chain_block_number() -> Weight {
+        T::DbWeight::get().reads(1 as u64)
+    }
+}
