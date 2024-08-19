@@ -122,6 +122,11 @@ pub use chain_extensions::*;
 
 mod weights;
 
+pub type AssetsForceOrigin = EnsureRoot<AccountId>;
+
+pub type CollectionId = u128;
+pub type ItemId = u128;
+
 /// Constant values used within the runtime.
 pub const MICROAST: Balance = 1_000_000_000_000;
 pub const MILLIAST: Balance = 1_000 * MICROAST;

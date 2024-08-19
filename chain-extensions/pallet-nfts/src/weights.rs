@@ -23,7 +23,6 @@
 use frame_support::{traits::Get, weights::{Weight, constants::RocksDbWeight}};
 use sp_std::marker::PhantomData;
 
-
 /// Weight functions needed for pallet-assets chain-extension.
 pub trait WeightInfo {
     fn owner() -> Weight;
