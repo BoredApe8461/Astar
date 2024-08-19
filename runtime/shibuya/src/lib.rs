@@ -1289,6 +1289,35 @@ impl pallet_unified_accounts::Config for Runtime {
     type WeightInfo = pallet_unified_accounts::weights::SubstrateWeight<Self>;
 }
 
+parameter_types! {
+    pub const UniquesCollectionDeposit: Balance = 10 * SBY;
+    pub const UniquesItemDeposit: Balance = 1 * SBY;
+    pub const UniquesMetadataDepositBase: Balance = deposit(1, 129);
+    pub const UniquesAttributeDepositBase: Balance = deposit(1, 0);
+    pub const UniquesDepositPerByte: Balance = deposit(0, 1);
+}
+
+impl pallet_uniques::Config for Runtime {
+    type RuntimeEvent = RuntimeEvent;
+    type CollectionId = CollectionId;
+    type ItemId = ItemId;
+    type Currency = Balances;
+    type ForceOrigin = EnsureRoot<AccountId>;
+    type CollectionDeposit = UniquesCollectionDeposit;
+    type ItemDeposit = UniquesItemDeposit;
+    type MetadataDepositBase = UniquesMetadataDepositBase;
+    type AttributeDepositBase = UniquesAttributeDepositBase;
+    type DepositPerByte = UniquesDepositPerByte;
+    type StringLimit = ConstU32<128>;
+    type KeyLimit = ConstU32<32>;
+    type ValueLimit = ConstU32<64>;
+    type WeightInfo = weights::pallet_uniques::WeightInfo<Runtime>;
+    #[cfg(feature = "runtime-benchmarks")]
+    type Helper = ();
+    type CreateOrigin = AsEnsureOriginWithArg<EnsureSigned<AccountId>>;
+    type Locker = ();
+}
+
 construct_runtime!(
     pub struct Runtime where
         Block = Block,

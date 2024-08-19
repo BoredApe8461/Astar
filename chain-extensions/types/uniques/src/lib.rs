@@ -50,6 +50,7 @@ pub enum Outcome {
     RuntimeError = 99,
 }
 
+
 impl From<DispatchError> for Outcome {
     fn from(input: DispatchError) -> Self {
         let error_text = match input {
