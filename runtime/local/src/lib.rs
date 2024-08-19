@@ -117,6 +117,11 @@ pub use chain_extensions::*;
 
 mod weights;
 
+pub type AssetsForceOrigin = EnsureRoot<AccountId>;
+
+pub type CollectionId = u128;
+pub type ItemId = u128;
+
 /// Constant values used within the runtime.
 pub const MICROAST: Balance = 1_000_000_000_000;
 pub const MILLIAST: Balance = 1_000 * MICROAST;
@@ -854,6 +859,7 @@ impl pallet_contracts::Config for Runtime {
         XvmExtension<Self, Xvm, UnifiedAccounts>,
         AssetsExtension<Self, pallet_chain_extension_assets::weights::SubstrateWeight<Self>>,
         UnifiedAccountsExtension<Self, UnifiedAccounts>,
+        UniquesExtension<Self, pallet_chain_extension_uniques::weights::SubstrateWeight<Self>>,
     );
     type Schedule = Schedule;
     type AddressGenerator = pallet_contracts::DefaultAddressGenerator;
@@ -948,7 +954,7 @@ impl InstanceFilter<RuntimeCall> for ProxyType {
             }
             // All Runtime calls from Pallet Assets allowed for proxy account
             ProxyType::Assets => {
-                matches!(c, RuntimeCall::Assets(..))
+                matches!(c, RuntimeCall::Assets(..) | RuntimeCall::Uniques(..))
             }
             ProxyType::Governance => {
                 matches!(
@@ -1010,6 +1016,35 @@ impl pallet_proxy::Config for Runtime {
     type AnnouncementDepositFactor = ConstU128<{ MILLIAST * 660 }>;
 }
 
+parameter_types! {
+    pub const UniquesCollectionDeposit: Balance = AST / 10;
+    pub const UniquesItemDeposit: Balance = AST / 1_000;
+    pub const UniquesMetadataDepositBase: Balance = deposit(1, 129);
+    pub const UniquesAttributeDepositBase: Balance = deposit(1, 0);
+    pub const UniquesDepositPerByte: Balance = deposit(0, 1);
+}
+
+impl pallet_uniques::Config for Runtime {
+    type RuntimeEvent = RuntimeEvent;
+    type CollectionId = CollectionId;
+    type ItemId = ItemId;
+    type Currency = Balances;
+    type ForceOrigin = AssetsForceOrigin;
+    type CollectionDeposit = UniquesCollectionDeposit;
+    type ItemDeposit = UniquesItemDeposit;
+    type MetadataDepositBase = UniquesMetadataDepositBase;
+    type AttributeDepositBase = UniquesAttributeDepositBase;
+    type DepositPerByte = UniquesDepositPerByte;
+    type StringLimit = ConstU32<128>;
+    type KeyLimit = ConstU32<32>;
+    type ValueLimit = ConstU32<64>;
+    type WeightInfo = weights::pallet_uniques::WeightInfo<Runtime>;
+    #[cfg(feature = "runtime-benchmarks")]
+    type Helper = ();
+    type CreateOrigin = AsEnsureOriginWithArg<EnsureSigned<AccountId>>;
+    type Locker = ();
+}
+
 // TODO: remove this once https://github.com/paritytech/substrate/issues/12161 is resolved
 #[rustfmt::skip]
 construct_runtime!(
@@ -1046,6 +1081,7 @@ construct_runtime!(
         Preimage: pallet_preimage,
         EthereumChecked: pallet_ethereum_checked,
         UnifiedAccounts: pallet_unified_accounts,
+        Uniques: pallet_uniques,
     }
 );
 
@@ -1161,6 +1197,7 @@ mod benches {
         [pallet_block_rewards_hybrid, BlockReward]
         [pallet_ethereum_checked, EthereumChecked]
         [pallet_dynamic_evm_base_fee, DynamicEvmBaseFee]
+        [pallet_assets, Uniques]
     );
 }
 

@@ -20,6 +20,7 @@ use super::{Runtime, UnifiedAccounts, Xvm};
 
 /// Registered WASM contracts chain extensions.
 pub use pallet_chain_extension_assets::AssetsExtension;
+pub use pallet_chain_extension_uniques::UniquesExtension;
 use pallet_contracts::chain_extension::RegisteredChainExtension;
 
 pub use pallet_chain_extension_dapps_staking::DappsStakingExtension;
@@ -44,4 +45,10 @@ impl<W: pallet_chain_extension_assets::weights::WeightInfo> RegisteredChainExten
 
 impl RegisteredChainExtension<Runtime> for UnifiedAccountsExtension<Runtime, UnifiedAccounts> {
     const ID: u16 = 03;
+}
+
+impl<W: pallet_chain_extension_uniques::weights::WeightInfo> RegisteredChainExtension<Runtime>
+    for UniquesExtension<Runtime, W>
+{
+    const ID: u16 = 04;
 }
